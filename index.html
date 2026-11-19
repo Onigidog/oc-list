@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>角色名冊</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: plain and quiet, matching the original sheet: black text on light paper.
+   IDEA: the spreadsheet roster: grey year bars, white character cards with a square portrait, a small ✶ tag.
+   PICTURE: the portraits themselves; empty slots wait for an image.
+   COLOUR and TYPE: white, light greys, black text only; Noto Sans TC throughout.
+   LAYOUT: title, sheet tabs, grey year bar, four-up cards (two on phones). */
+:root{color-scheme:light;--bg:#fafafa;--card:#fafafa;--ink:#282828;--mute:#888;--line:#ececec;--bar:#d9d9d9;--slot:#f2f2f2}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(24px,4vw,48px) max(5vw,16px)}
+.wrap{max-width:1000px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.sky{padding-bottom:6px;text-align:center}
+.sky h1{font:700 clamp(28px,4.5vw,40px)/1.1 "Noto Sans TC",sans-serif;margin:0 0 8px;letter-spacing:.12em}
+.sky p{margin:0 auto;color:var(--mute);font-size:14px}
+
+body{background:#e6e6e6}
+.shell{display:flex;align-items:flex-start;min-height:100vh;padding:clamp(12px,3vw,32px) clamp(10px,3vw,32px) clamp(12px,3vw,32px) 0}
+nav{position:sticky;top:clamp(12px,3vw,32px);z-index:5;flex:none;width:clamp(40px,5vw,50px);padding-top:28px}
+nav .wrap{display:flex;flex-direction:column;gap:4px;padding:0}
+nav a{display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;min-height:116px;padding:14px 0;background:#d9d9d9;color:#777;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.14em;border:1px solid #cfcfcf;border-right:0;border-radius:8px 0 0 8px;box-shadow:-1px 1px 2px rgb(40 40 40/.08);position:relative;margin-right:-1px}
+nav a:hover{background:#e3e3e3;color:var(--ink)}
+nav a[aria-current=page]{background:var(--card);color:var(--ink);border-color:#d6d6d6;z-index:2}
+main.band{flex:1;background:var(--card);border:1px solid #d6d6d6;box-shadow:0 2px 10px rgb(40 40 40/.08);min-height:calc(100vh - 2*clamp(12px,3vw,32px));padding:clamp(20px,4vw,48px) clamp(14px,4vw,48px)}
+@media(max-width:600px){nav a{min-height:84px;font-size:12px}}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-bottom:6px}
+.tools input{flex:0 1 320px;font-size:16px;padding:9px 12px;border:1px solid #ddd;background:#fafafa;color:var(--ink);min-height:44px}
+.tools input:focus{border-color:#999;outline:none}
+.seg{display:flex;border:1px solid #ddd;background:#fafafa}
+.seg button{background:#fafafa;border:0;padding:0 16px;min-height:44px}
+.seg button+button{border-left:1px solid #ddd}
+.seg button[aria-pressed=true]{background:#555;color:#fafafa}
+.count{color:var(--mute);font-size:14px}
+
+.yr{padding:22px 0 6px}
+.yr h2,.co h2{background:var(--bar);color:#fafafa;font-weight:700;font-size:14px;line-height:1;padding:6px 8px;margin:0 0 22px;text-align:left}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:30px clamp(14px,4vw,44px)}
+.ch{all:unset;box-sizing:border-box;cursor:pointer;display:block;position:relative;background:var(--card);border:1px solid #e6e6e6;box-shadow:0 1px 2px rgb(40 40 40/.1);text-align:center}
+.ch:hover{box-shadow:0 2px 8px rgb(40 40 40/.14)}
+.ch:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.av{display:block;aspect-ratio:1;background:var(--slot) center/cover no-repeat;border-bottom:1px solid var(--line)}
+.av.none{display:grid;place-items:center;color:#c8c8c8;font-size:12px}
+.tag{position:absolute;top:0;right:-1px;width:16px;height:16px;background:#bdbdbd;color:#fafafa;font-size:10px;line-height:16px;text-align:center}
+.ch .nm{display:block;padding:6px 6px 5px;border-bottom:1px solid var(--line);min-height:52px}
+.ch i{display:block;font-style:normal;font-size:11px;color:#555;line-height:1.3}
+.ch b{display:block;font-weight:700;font-size:16px;line-height:1.35}
+.ch .row{display:block;font-size:13px;font-weight:700;color:#444;padding:4px 4px;min-height:29px}
+.ch .row+.row{border-top:1px solid var(--line)}
+.empty{color:var(--mute);padding:30px 0;text-align:center}
+
+.gate{border:1px solid #ddd;background:#fafafa;padding:28px;text-align:center;max-width:520px;margin:20px auto}
+.gate p{margin:0 0 14px}
+.btn{background:#444;color:#fafafa;border:0;padding:10px 20px;min-height:44px}
+.btn.ghost{background:#fafafa;color:var(--ink);border:1px solid #ccc}
+
+.co{padding:22px 0 6px}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:8px;padding:12px;background:#fafafa;border:1px solid #e6e6e6;box-shadow:0 1px 2px rgb(40 40 40/.08);text-align:center}
+.pair .x{font-size:12px;color:#aaa;align-self:center}
+.mini{display:block;width:56px;aspect-ratio:1;margin:0 auto 6px;background:var(--slot) center/cover no-repeat}
+.pair .who b{display:block;font-weight:700;font-size:15px;line-height:1.35}
+.pair .who i{display:block;font-style:normal;font-size:11px;color:var(--mute);line-height:1.4}
+.pair .who em{display:block;font-style:normal;font-size:12px;margin-top:2px;color:#555}
+.pair .tg{grid-column:1/-1;font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:6px}
+.link{all:unset;cursor:pointer;border-bottom:1px solid #ccc}
+.link:hover{border-color:var(--ink)}
+.link:focus-visible{outline:2px solid var(--ink)}
+h3.sub{font-weight:700;font-size:18px;margin:40px 0 0;text-align:center}
+
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:12px}
+.pj{padding:14px 12px;background:#fafafa;border:1px solid #e6e6e6;box-shadow:0 1px 2px rgb(40 40 40/.08);text-align:center}
+.pj .m{font-size:12px;color:var(--mute)}
+.pj h4{font-weight:700;font-size:16px;margin:2px 0 8px}
+.pj ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:2px 12px}
+.pj li{font-size:14px}
+.vt{list-style:none;margin:10px auto 0;padding:0 0 0 22px;max-width:560px;position:relative}
+.vt::before{content:"";position:absolute;left:3px;top:12px;bottom:42px;width:1px;background:#bdbdbd}
+.vt li{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:16px;padding:0 0 30px;position:relative}
+.vt li::before{content:"";position:absolute;left:-22px;top:9px;width:7px;height:7px;border-radius:50%;background:#666}
+.vt .dt{font-size:16px;color:#444;line-height:1.5}.vt .dt small{font-size:13px;color:var(--mute)}
+.vt h4{margin:0;font-size:17px;font-weight:700;line-height:1.5}
+.vt p{margin:2px 0 0;font-size:14px;color:#666}
+.npc{font-size:12px;color:var(--mute)}
+
+#ov{position:fixed;inset:0;background:rgb(250 250 250/.85);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+#ov.on{display:flex}
+#dlg{background:#fafafa;color:var(--ink);border:1px solid #e0e0e0;box-shadow:0 6px 30px rgb(40 40 40/.12);width:min(440px,100%);max-height:90vh;overflow:auto;padding:26px 24px 20px;position:relative;text-align:center}
+#dlg .close{position:absolute;right:4px;top:4px;width:44px;height:44px;border:0;background:none;font-size:20px;color:var(--mute)}
+#dlg .big{width:min(240px,70%);aspect-ratio:1;margin:8px auto 10px;background:var(--slot) center/cover no-repeat;display:grid;place-items:center;color:#bbb;font-size:13px;border:1px solid var(--line)}
+#dlg .avbtns{display:flex;gap:8px;justify-content:center;margin-bottom:6px}
+#dlg .avbtns .btn{padding:6px 14px;font-size:14px}
+#dlg .kind{font-size:12px;color:var(--mute)}
+#dlg h2{font-weight:700;font-size:26px;line-height:1.2;margin:2px 0 0}
+#dlg .rd{color:#555;font-size:13px;margin:0}
+#dlg .stat{margin:4px 0 0;font-weight:700;font-size:14px}
+#dlg h5{font-size:12px;color:var(--mute);margin:16px 0 6px;font-weight:400;border-top:1px solid var(--line);padding-top:12px}
+#dlg ul{margin:0;padding:0;list-style:none;font-size:14px}#dlg li{margin:4px 0}
+footer{color:var(--mute);font-size:13px;text-align:center}
+@media(max-width:600px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 14px}}
+
+/* acrylic charm */
+.charm{position:fixed;top:0;right:clamp(14px,4vw,56px);z-index:15;width:92px;border:0;background:none;padding:0;transform-origin:46px 0;filter:drop-shadow(5px 8px 5px rgb(170 165 90/.35))}
+.charm svg{display:block;width:100%;height:auto}
+.charm:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.charm.swing{animation:swing 1.1s ease-out}
+@keyframes swing{0%{transform:rotate(0)}20%{transform:rotate(7deg)}45%{transform:rotate(-5deg)}70%{transform:rotate(2.5deg)}100%{transform:rotate(0)}}
+@media(prefers-reduced-motion:reduce){.charm.swing{animation:none}}
+#ovw{position:fixed;top:24px;right:calc(clamp(14px,4vw,56px) + 104px);z-index:16;width:min(300px,calc(100vw - 130px));max-height:min(72vh,620px);overflow:auto;background:var(--card);border:1px solid #d6d6d6;box-shadow:0 8px 28px rgb(40 40 40/.14);padding:16px 18px;display:none}
+#ovw.on{display:block}
+#ovw h3{margin:0 0 4px;font-size:15px;letter-spacing:.12em;color:#aaa55a}
+#ovw h4{margin:12px 0 4px;font-size:12px;font-weight:700;color:var(--mute);border-bottom:1px solid var(--line);padding-bottom:3px}
+#ovw p{margin:0;font-size:14px;line-height:1.9}
+#ovw .link{font-size:14px}
+@media(max-width:600px){.charm{width:56px;transform-origin:28px 0}#ovw{right:12px;top:150px;width:calc(100vw - 24px);max-height:60vh}}
+
+main.band{position:relative}
+#auth{position:absolute;top:10px;left:14px;display:flex;gap:8px;align-items:center;font-size:13px}
+.authbtn{border:0;background:none;color:var(--mute);text-decoration:underline;text-underline-offset:3px;padding:8px 4px;min-height:36px;font-size:13px}
+.authbtn:hover{color:var(--ink)}
+.own{background:#aaa55a;color:#fafafa;padding:1px 8px;font-size:12px;font-weight:700}
+#banner{background:#efefef;border:1px solid #dcdcdc;padding:10px 14px;font-size:14px;margin:18px 0 0;text-align:center}
+#banner code{background:#fafafa;padding:0 4px}
+.mini-btn{border:1px solid #d0d0d0;background:#fafafa;color:#555;font-size:12px;padding:2px 10px;min-height:28px;vertical-align:middle;font-weight:400}
+.mini-btn:hover{border-color:#888;color:var(--ink)}
+.addrow{text-align:center;margin:14px 0 4px}
+.btn.danger{color:#a33;border-color:#d9b3b3}
+.addwrap{max-width:620px;margin:0 auto}
+.frm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;text-align:left;margin-top:14px}
+.fld{display:flex;flex-direction:column;gap:4px}.fld.wide{grid-column:1/-1}
+.fld label,.fld .lbl{font-size:13px;color:#555;font-weight:700}
+.fld input,.fld select,.fld textarea{font:inherit;font-size:16px;padding:9px 11px;border:1px solid #d6d6d6;background:#fafafa;color:var(--ink);min-height:44px;border-radius:0}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:#888}
+.fld textarea{resize:vertical;line-height:1.6}
+.imgrow{display:flex;gap:14px;align-items:center}
+.pv{flex:none;width:96px;height:96px;background:var(--slot) center/cover no-repeat;border:1px solid var(--line);display:grid;place-items:center;color:#bbb;font-size:12px}
+.filebtn{display:inline-flex;align-items:center;cursor:pointer}
+.hint{font-size:12px;color:var(--mute);margin:6px 0 0}
+.acts{flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;justify-content:center;margin-top:6px}
+.msg{font-size:13px;color:#a33}
+#dlg .frm{grid-template-columns:minmax(0,1fr)}
+#dlg{width:min(480px,100%)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#282828;color:#fafafa;padding:10px 18px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+nav a[hidden]{display:none}
+@media(max-width:600px){.frm{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<button class="charm" id="charm" aria-expanded="false" aria-controls="ovw" aria-label="打開本頁角色總覽">
+<svg viewBox="0 0 78 210" aria-hidden="true">
+ <defs>
+  <linearGradient id="acr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c4bf7a"/><stop offset=".55" stop-color="#aaa55a"/><stop offset="1" stop-color="#97924c"/></linearGradient>
+  <clipPath id="tagc"><rect x="9" y="88" width="60" height="114" rx="30"/></clipPath>
+ </defs>
+ <!-- lobster clasp -->
+ <path d="M39 4c-10 0-15 7-15 15s5 15 15 15 15-7 15-15" fill="none" stroke="#aaa55a" stroke-width="7" stroke-linecap="round"/>
+ <path d="M54 19c0-6-3-11-8-13" fill="none" stroke="#c4bf7a" stroke-width="3" stroke-linecap="round"/>
+ <rect x="33" y="31" width="12" height="9" rx="3" fill="#aaa55a"/>
+ <!-- clear chain -->
+ <rect x="32" y="38" width="14" height="20" rx="7" fill="rgb(250 250 250/.45)" stroke="#d2d2d2" stroke-width="3"/>
+ <rect x="37" y="52" width="4" height="20" rx="2" fill="rgb(250 250 250/.6)" stroke="#cfcfcf" stroke-width="2"/>
+ <rect x="32" y="66" width="14" height="20" rx="7" fill="rgb(250 250 250/.45)" stroke="#d2d2d2" stroke-width="3"/>
+ <!-- jump ring -->
+ <circle cx="39" cy="89" r="5.5" fill="none" stroke="#bdbdbd" stroke-width="2"/>
+ <!-- acrylic tag -->
+ <rect x="9" y="88" width="60" height="114" rx="30" fill="url(#acr)" opacity=".88"/>
+ <g clip-path="url(#tagc)" fill="none" stroke="#fafafa" stroke-width="1.4" opacity=".55">
+  <path d="M0 120c14-6 26 6 40 0s26-6 40 0"/><path d="M0 150c14-6 26 6 40 0s26-6 40 0"/><path d="M0 180c14-6 26 6 40 0s26-6 40 0"/>
+ </g>
+ <rect x="10.5" y="89.5" width="57" height="111" rx="28.5" fill="none" stroke="#fafafa" stroke-opacity=".5" stroke-width="1.5"/>
+ <circle cx="39" cy="97" r="3" fill="#e6e6e6"/>
+ <text x="39" y="124" text-anchor="middle" fill="#fafafa" font-size="17">✶</text>
+ <text id="charmT" x="39" y="152" text-anchor="middle" fill="#282828" font-size="12" font-weight="700" letter-spacing="1.5">ᴏᴄ</text>
+ <text id="charmN" x="39" y="170" text-anchor="middle" fill="#282828" font-size="10">69</text>
+ <text x="39" y="186" text-anchor="middle" fill="#fafafa" font-size="7" letter-spacing="1">ɪɴᴅᴇx</text>
+</svg></button>
+<div id="ovw" role="dialog" aria-label="本頁角色總覽"></div>
+<div class="shell"><nav aria-label="分頁"><div class="wrap" id="tabs">
+<a href="#oc">ᴏᴄ</a><a href="#trpg">ᴛʀᴘɢ</a><a href="#co">ᴄᴏ</a><a href="#project">ᴘʀᴏᴊᴇᴄᴛ</a><a href="#add" id="addTab" hidden>新增</a>
+</div></nav>
+<main class="band"><div id="auth"></div><div class="wrap"><div id="banner" hidden>預覽模式：還沒填入 Firebase 設定，目前顯示的是原始名單，不能編輯。</div><div id="view"></div></div></main></div>
+<div id="ov" role="dialog" aria-modal="true" aria-labelledby="dn"><div id="dlg"></div></div>
+<div id="toast" role="status"></div>
+<script type="module">
+// =====================================================================
+//  設定：把 Firebase 專案設定貼在這裡，OWNER_EMAIL 填你的 Google 帳號
+// =====================================================================
+const FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+const OWNER_EMAIL = "";          // 只有這個 Google 帳號可以編輯
+const P = "roster_";             // Firestore 集合前綴，可和浮生閣共用同一個專案
+// =====================================================================
+
+const OC_RAW=`2026|김천세|金千歲|F|17|162|高中生
+2026|Daru Rajput|達魯・拉傑普特|M|16|188|高中生
+2026|Vaurien|沃里安|M|-|-|
+2026||笑尾|F|-|-|青樓老闆娘
+2026||莫笑|M|-|-|
+2025|ゆうき さいさい|幽奇 歲歲|F|12|143|
+2025|ゆうき おにに|幽奇 鬼鬼||||
+2025|Varin|瓦林|M|-|-|
+2025|이수유|李秀宥|F|21|156|大學生
+2025|しめ ミッシェル|七五三 米歇爾|M|17|188|高中生
+2025|のざき のら|野崎 野良|F|18|146|高中生
+2025|たちばな なお|橘 名尾|M|16|178|高中生
+2025||小柑|F|3|144|
+2025|Asher·Maddox|艾許・馬多克斯||||
+2025|Liam·Maddox|利亞姆・馬多克斯||||
+2024|きんざき あきよ|金咲 朗代|F|?|167|
+2024|すが|須賀|M|?|188|
+2023|みらか りょう|三樂坂 良|M|17|167|高中生
+2022|やぎさわ にき|八木澤 仁季|F|17|160|
+2022|やぎさわ にや|八木澤 仁弥|M|16|168|
+2022|Charlotte|夏洛特|F|17|163|
+2022|Charles|查爾斯|M|17|163|
+2022|Randolph Morgan|藍道夫・摩根|M|17|180|
+2022|Elaine Brown|伊蓮恩・布朗|F|14|150|
+2022|Canary|金絲雀|F|16|160|
+2022|Louis|路易斯|M||176|
+2022|いちのせ りょうすけ|一之瀬 涼介|M|16|168|
+2022|いちのせ じゅん|一之瀬 潤|M|16|174|
+2022|Luka Siveston|露卡・西維斯頓|F|15|144|
+2022|Selwyn Siveston|賽爾文・西維斯頓|M|18|182|
+2022|こいずみ|小泉|F|15|158|
+2022|Cyno|賽諾|M|-|179.9|
+2021|かもん こくり|嘉門 穀里|M|17|179|
+2021|かもん ありお|嘉門 有生|F|18|176|
+2021|おのせ むみ|小野瀨 橆実|F|17|169|
+2021|あさくら とうま|朝倉 当麻|M|16|171|
+2021|Hsu Cheng-yang|許成陽|M|16|173|
+2021|Chen Shang-hai|陳尚海|M|17|175|
+2021|Chen Mei-yu|陳梅雨|F|16|159|
+2021|Brenta|布倫塔|F|-|-|
+2021|いらは かおる|伊良波 薰|M|-|-|牛郎
+2021|なるみや みか|成宮 実日|F|-|-|黑道
+2021|あさひ かや|朝日 加悅|F|16|156|高中生
+2021|Sui Hsi|隋葈|M|18|169|高中生
+2021|Ku Yen-yu|辜言御|M|18|178|高中生
+2021|Ku Yen-cheng|辜言程|M|18|180|高中生
+2021|Elsie|埃爾西|F|16|158|高中生
+2021|ようとう|洋燈|M||174|
+2020|Recit Charny|雷西特・夏爾尼|F|14|150|國中生
+2020|にしむら はなみ|西村 花見|M|17|175|高中生
+2020|にしむら はるき|西村 春樹|M|20|178|大學生
+2020|にしむら ひなこ|西村 雛子|F|11|156|小學生
+2020|Robin|羅賓|M|17|160|高中生
+2020|はやさか かずの|早坂 和野|M|16|168|高中生
+2020|はやさか かずみ|早坂 和實|M|18|174|高中生
+2020|Clock|柯洛克|M||178|管家
+2020|さわき ゆうま|沢木 悠真|M|16|169|高中生
+2020|さわき ゆい|沢木 結衣|F|17|167|高中生
+2020|あさひ さちこ|朝日 佐千子|F|20|164|大學生
+2020|あさひ ともい|朝日 和犬|M|23|182|大學生
+2020|Hsu Mo-yang|許茉央|F|17|166|高中生
+2019|Liz|梨子|F||166|
+2019|Sancho|松竺|F|-|-|
+2019||（原表未填名）|F||156|咖啡店店員
+2018|Flora|芙蓉|F|-|-|天使
+2018|Mocha|莫卡|F|-|-|高中生
+2017|Orphée|歐菲|F|-|-|咖啡店店長
+2017|つきした りん|月下 凜|F|16|168|偶像
+2016|さくら|櫻|F|-|-|高中生`;
+const TR_RAW=`2026|つるはら がく|鶴原 樂|M|28|172|新聞工作者
+2026|わたし ばんぱいあ|綿司 萬拝亜||||
+2025||梅過||||
+2025||有稻荷 小柑|M|18|169|高中生
+2025|ゆら ふぶき|由良 吹雪|M|17|184|攝影師
+2025|Sasha・Eunice|莎夏・尤尼斯|F|?|152|大賢者
+2025|かめたに ひがし|龜谷 東|M|24|166|
+2025|ななとり るかわ|七鳥 琉川|M|21|178|大學生
+2025|あき|西|M|23|178|都市傳說課職員
+2025|Custard·Moreau|卡士達・莫羅|F|10|126|
+2025|ざいは イタチ|財破 鼬|M|23|168|無業遊民
+2025||花小路 橘里|F|17|152|高中生
+2025|みなもと くしょう|源 苦生|M|26|172|
+2025|にへい しま|二瓶 島|F|20|160|大學生
+2025|Signe・Holm|西格妮・霍姆|F|28|172|
+2025|しのはら みなと|篠原 湊|M|27|176|巡查部長
+2025|Clara·Müller|克拉拉・米勒|F|22|156|裁縫師
+2024|きいの ひふみ|紀伊野 一二三|M|27|169|登山家＆攝影師
+2024|みとおか とつき|三十日 都月|M|25|189|
+2024|そおとめ みか|早乙女 美伽|M|22|152|
+2024|まつひら ひばり|松比良 雲雀||||
+2024|しらぬい じゅうこ|不知火 十子|F|25|164|刑警（鑑識科）
+2024|いくも あきはる|生雲 明治|M|22|166|罪犯
+2024|なとり かな|名取 伽納|F|22|167|教祖
+2024|うらた かさみ|浦田 笠海|F|28|172|贗作師
+2023|まんたに にき|万谷 日記|F|19|162|大學生
+2023|かもん ねこ|嘉門 寝子|F|25|175|英語教師
+2023|しおみ わたる|潮見 涉|M|20|168|考古學者
+2023|すがはら はる|菅原 春|M|14|163|中學生
+2023|あめは しお|雨沺 塩|F|17|174|高中生
+2023|たど りま|田戸 リマ|F|23|156|大學生
+2023|たど りめ|田戸 理芽|F|20|152|大學生
+2022|なりあき さきな|成明 咲那|F|17|164|高中生
+2022|たかなし まい|小鳥遊 芽生|F|31|165|兒科助理（前刑警）`;
+const CO_RAW=`靜靜|西村 花見|にしむら はなみ|學弟|小花 時子|こばな ときこ|學姊|
+靜靜|柯洛克|Clock|管家|莉莉絲・E・奧莉維亞・所羅門|Lilith E Olivia Solomon|大小姐|
+靜靜|辜言御＆辜言程|Ku Yen-yu＆Ku Yen-cheng|哥哥|辜語曦||妹妹|骨科
+靜靜|埃爾西|Elsie|學姊|列儂・T・桑莫哈德|Lennon T Somerhalder|學弟|
+靜靜|洋燈|ようとう||小鈴鐺|||
+靜靜|紀蓮||花魁|白蛇|||
+靜靜|嘉門 有生|かもん ありお|學姊|||學妹|
+靜靜|賽爾文・西維斯頓|Selwyn Siveston||||||
+阿朕|成明 咲那|なりあき さきな||守居 已人|||
+阿朕|小鳥遊 芽生|たかなし まい|花店員工／前兒科醫生／前零課副課長|宇都宮 千哉|うつのみや ちや|花店員工／前零課刑警|
+阿朕|金咲 朗代|きんざき あきよ|金靈|欠塚 彌生|かけづか やよい|窮鬼|
+阿朕|李秀宥|이수유|學姊|千時賢|천시현|學弟|
+那那|賽諾|Cyno||克里斯|||
+那那|須賀|すが|狐妖|夕立|ゆうだち|貓又|
+那那|瓦林|Varin|酒館店主／前傭兵|波文|Bowen|前傭兵|
+那那|沃里安|Vaurien|哥哥|西爾凡・瓦勒里安|Sylvan Valerian|弟弟|骨科
+ㄈㄉ|藍道夫・摩根|Randolph Morgan|高中生|八百 潤|やお じゅん|高中生|
+ㄈㄉ|三樂坂 良|みらか りょう|高中生|貓羽 深雪|ねこは みゆき|高中生|
+ㄈㄉ|嘉門 寝子|かもん ねこ|英語教師|川浦 飛鳥|かわうら あすか|⚠️ 肥皂劇透|
+ㄈㄉ|万谷 日記|まんたに にき|妹妹|万谷 早紀||姊姊|姐妹・CB
+ㄈㄉ|二瓶 島|にへい しま|大學生|二之宮 未來|にのみや みく|大學生|
+ㄈㄉ|花小路 橘里||高中生|花咲 澄人|はなさき すみと|高中生|青梅竹馬
+ㄈㄉ|西|あき|後輩|北|きた|前輩|CB
+ㄈㄉ|七鳥 琉川|ななとり るかわ|大學生|九十九 雲彥|つくも くもひこ||
+ㄈㄉ|龜谷 東|かめたに ひがし|前音樂家|浦島 南|うらしま みなみ||CB
+ㄈㄉ|綿司 萬拝亜|わたし ばんぱいあ|吸血鬼|國信 長央|ぐにのぶ ながお|超商店員|
+普普|田戸 理芽|たど りめ|妹妹|田戸 仁季|たど にき|姊姊|骨科
+晚煙|浦田 笠海|うらた かさみ|贗畫師|波|なみ|怪盜|搭檔・CB
+晚煙|名取 伽納|なとり かな|教祖|辻川 海月|みずき|信徒|
+惠子|源 苦生|みなもと くしょう|不幸堂店主|柳 碧|りゅ あお|不幸堂來客|
+惠子|由良 吹雪|ゆら ふぶき|哥哥|由良 小雪||妹妹|兄妹・CB
+惠子|艾許・馬多克斯＆利亞姆・馬多克斯|Asher·Maddox＆Liam·Maddox|學弟|||學姊|
+小編|達魯・拉傑普特|Daru Rajput|學弟|丹德里提・迪格蒙迪|Dendritic Digment|學長|
+玲玲|朝日 和犬|あさひ ともい|學長|杏司恩||學弟|
+小艾|芙蓉|Flora||提歐|||`;
+const FAM=[
+ {f:'阿莫斯',m:[['金絲雀・阿莫斯','Canary','妹妹'],['維吉爾・阿莫斯','Virgil Amos','大哥'],['','','表弟']]},
+ {f:'紀伊野',m:[['紀伊野 一二三','きいの ひふみ','二哥'],['紀伊野 零','きいの れい','大哥'],['紀伊野 百','きいの もも','妹妹']]}
+];
+const PJ=[
+ {y:2026,it:[{m:'',n:'',c:['金千歲','達魯・拉傑普特','金絲雀']},{m:'',n:'',c:['李秀宥']}]},
+ {y:2022,it:[{m:'3月',n:'私立西城公学',c:['藍道夫・摩根','伊蓮恩・布朗','金絲雀']},{m:'4月',n:'UNLOCK!',c:['貓宮 瑠華']},{m:'5月',n:'子鳥居學園',c:['南']},{m:'11月',n:'美高',c:['金絲雀']}]},
+ {y:2021,it:[{m:'1月',n:'私立南高等学校',c:['朝日 加悅','隋葈']},{m:'2月',n:'東木超能學府',c:['朝倉 当麻']},{m:'3月',n:'孝信高中',c:['許成陽','陳尚海','陳梅雨']},{m:'4月',n:'魔院',c:['辜言御','辜言程']},{m:'6月',n:'北木超能學府',c:['嘉門 穀里','嘉門 (NPC)','小野瀨 橆実']},{m:'12月',n:'DTD',c:['伊良波 薰','成宮 実日']}]},
+ {y:2020,it:[{m:'1月',n:'蓮英超能學院',c:['雷西特・夏爾尼','西村 花見','西村 春樹 (NPC)','西村 雛子 (NPC)']},{m:'5月',n:'薪御能',c:['和野']},{m:'7月',n:'Energy實驗學校',c:['羅賓','西村 花見']},{m:'7月',n:'永明高中',c:['許茉央']},{m:'8月',n:'南木超能學府',c:['早坂 和野','早坂 和實']},{m:'9月',n:'超能大學',c:['朝日 佐千子','朝日 和犬','羅賓']}]},
+ {y:2016,it:[{m:'1月',n:'園螢高中',c:['櫻']}]}
+];
+
+
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s??'').replace(/\(NPC\)/g,'').replace(/[\s・·•＆&()（）]/g,'');
+const $=id=>document.getElementById(id);
+
+/* ---------- seed (原始名單，用於第一次匯入與離線預覽) ---------- */
+const seedChars=()=>{let o=0;const p=(raw,t)=>raw.trim().split('\n').map(l=>{const [y,r,n,s,a,h,j]=l.split('|');return{type:t,year:+y,reading:r,name:n,sex:s,age:a,height:h,job:j,avatar:'',order:o++}});return [...p(OC_RAW,'oc'),...p(TR_RAW,'trpg')]};
+const seedCo=()=>CO_RAW.trim().split('\n').map((l,i)=>{const [partner,a,ar,arl,b,br,brl,tag]=l.split('|');return{partner,a,ar,arl,b,br,brl,tag:tag||'',order:i}});
+const seedFam=()=>FAM.map((f,i)=>({name:f.f,members:f.m.map(m=>m.join('｜')).join('\n'),order:i}));
+const seedPj=()=>{let o=0;return PJ.flatMap(g=>g.it.map(i=>({year:g.y,month:i.m,name:i.n,cast:i.c.join('、'),order:o++})))};
+
+/* ---------- state ---------- */
+const S={chars:[],co:[],fam:[],pj:[]};
+let user=null,online=false,api=null,trOpen=false,ready=false;
+try{trOpen=sessionStorage.getItem('trOpen')==='1'}catch(e){}
+const isOwner=()=>!!(user&&OWNER_EMAIL&&user.email===OWNER_EMAIL);
+
+/* ---------- derived ---------- */
+const chars=t=>S.chars.filter(c=>c.type===t).sort((a,b)=>b.year-a.year||a.order-b.order);
+const byId=id=>S.chars.find(c=>c.id===id);
+const matchName=(c,s)=>{const n=norm(c.name),p=norm(s);return !!p&&(p===n||(p.length>=2&&n.endsWith(p)))};
+const findChar=s=>S.chars.find(c=>norm(c.name)===norm(s))||S.chars.find(c=>matchName(c,s));
+const castList=pj=>String(pj.cast||'').split(/[、,，\n]/).map(x=>x.trim()).filter(Boolean);
+const monthNum=m=>parseInt(m)||0;
+const pjSorted=()=>[...S.pj].sort((a,b)=>b.year-a.year||monthNum(b.month)-monthNum(a.month)||b.order-a.order);
+const coSorted=()=>[...S.co].sort((a,b)=>a.order-b.order);
+const famMembers=f=>String(f.members||'').split('\n').map(l=>l.split('｜')).filter(m=>m.some(x=>x&&x.trim()));
+const coOf=c=>S.co.filter(x=>String(x.a).split('＆').some(s=>norm(s)===norm(c.name)));
+const pjOf=c=>pjSorted().filter(p=>castList(p).some(s=>matchName(c,s)));
+const famOf=c=>S.fam.filter(f=>famMembers(f).some(m=>m[0]&&(norm(m[0])===norm(c.name)||norm(m[0]).startsWith(norm(c.name)))));
+const stat=c=>`${c.sex||'-'} / ${!c.age?'-':c.age==='-'||c.age==='?'?c.age:c.age+'y'} / ${!c.height||c.height==='-'?'-':c.height} cm`;
+const bg=u=>u?` style="background-image:url('${u}')"`:'';
+
+/* ---------- views ---------- */
+const view=$('view');
+const editBtn=(col,id,label='編輯')=>isOwner()?`<button class="mini-btn" data-edit="${col}" data-eid="${id}">${label}</button>`:'';
+const addBtn=(col,label)=>isOwner()?`<div class="addrow"><button class="btn ghost" data-edit="${col}" data-eid="">${label}</button></div>`:'';
+
+const card=c=>`<button class="ch" data-id="${c.id}"><span class="av ${c.avatar?'':'none'}"${bg(c.avatar)}>${c.avatar?'':'頭貼'}</span><span class="tag" aria-hidden="true">${c.type==='trpg'?'✱':'✶'}</span><span class="nm">${c.reading?`<i>${esc(c.reading)}</i>`:''}<b>${esc(c.name)}</b></span><span class="row">${esc(stat(c))}</span><span class="row">${esc(c.job)}</span></button>`;
+const roster=list=>{const ys=[...new Set(list.map(c=>c.year))];
+ return ys.length?ys.map(y=>`<section class="yr"><h2>${y}</h2><div class="grid">${list.filter(c=>c.year===y).map(card).join('')}</div></section>`).join(''):`<p class="empty">還沒有角色。${isOwner()?'到「新增」分頁加第一位。':''}</p>`};
+
+const who=(n,r,role)=>{const c=n&&String(n).split('＆').length===1?findChar(n):null;
+ const name=n?(c?`<button class="link" data-id="${c.id}">${esc(n)}</button>`:esc(n)):'<span class="npc">未填名</span>';
+ return `<div class="who"><span class="mini"${c?bg(c.avatar):''}></span><b>${name}</b>${r?`<i>${esc(r)}</i>`:''}${role?`<em>${esc(role)}</em>`:''}</div>`};
+const coView=()=>{const list=coSorted(),ps=[...new Set(list.map(x=>x.partner))];
+ return addBtn('co','＋ 新增配對')+ps.map(p=>`<section class="co"><h2>${esc(p)||'未分組'}</h2><div class="pairs">${list.filter(x=>x.partner===p).map(x=>`<div class="pair">${who(x.a,x.ar,x.arl)}<span class="x" aria-hidden="true">✶</span>${who(x.b,x.br,x.brl)}${x.tag||isOwner()?`<div class="tg">${esc(x.tag)} ${editBtn('co',x.id)}</div>`:''}</div>`).join('')}</div></section>`).join('')+
+ `<h3 class="sub">家族</h3>`+addBtn('fam','＋ 新增家族')+[...S.fam].sort((a,b)=>a.order-b.order).map(f=>`<section class="co"><h2>${esc(f.name)}</h2><div class="pairs">${famMembers(f).map(m=>`<div class="pair" style="grid-template-columns:minmax(0,1fr)">${who(m[0],m[1],m[2])}</div>`).join('')}</div>${isOwner()?`<div class="addrow">${editBtn('fam',f.id,'編輯這個家族')}</div>`:''}</section>`).join('');
+};
+const pjView=()=>addBtn('pj','＋ 新增企劃')+`<ol class="vt">${pjSorted().map(i=>`<li><span class="dt">${i.year}${i.month?`<br><small>${esc(i.month)}</small>`:''}</span><div><h4>${esc(i.name||'企劃名未填')} ${editBtn('pj',i.id)}</h4><p>${castList(i).map(s=>{const npc=/NPC/.test(s),nm=s.replace(/\s*\(NPC\)/,''),c=npc?null:findChar(nm);return (c?`<button class="link" data-id="${c.id}">${esc(nm)}</button>`:esc(nm))+(npc?'（NPC）':'')}).join('、')}</p></div></li>`).join('')}</ol>`;
+const gate=()=>`<div class="gate"><p style="font-size:18px">⚠️ TRPG 角卡可能會劇透</p><p>角卡裡的身分與經歷可能洩漏模組內容。確定要看再打開。</p><button class="btn" id="openTr">顯示 TRPG 角卡</button></div>`;
+
+/* ---------- forms ---------- */
+const SCHEMA={
+ chars:[{k:'type',l:'類別',t:'select',o:[['oc','ᴏᴄ 原創角色'],['trpg','ᴛʀᴘɢ 角卡']]},{k:'year',l:'年份',t:'number'},{k:'avatar',l:'頭貼',t:'image'},{k:'name',l:'名字',req:1},{k:'reading',l:'讀音／原文名',ph:'例：きんざき あきよ、Daru Rajput'},{k:'sex',l:'性別',t:'select',o:[['F','F'],['M','M'],['','未填']]},{k:'age',l:'年齡',ph:'數字，或 ? / -'},{k:'height',l:'身高 cm',ph:'數字，或 -'},{k:'job',l:'身分'}],
+ co:[{k:'partner',l:'合作夥伴',list:'dlPartner',req:1},{k:'a',l:'自家角色',list:'dlChars',ph:'兩位以上用 ＆ 分隔'},{k:'ar',l:'自家角色讀音'},{k:'arl',l:'自家角色身分／關係'},{k:'b',l:'對方角色'},{k:'br',l:'對方角色讀音'},{k:'brl',l:'對方角色身分／關係'},{k:'tag',l:'標籤',ph:'例：骨科、CB、青梅竹馬'}],
+ pj:[{k:'year',l:'年份',t:'number',req:1},{k:'month',l:'月份',ph:'例：3月'},{k:'name',l:'企劃名稱'},{k:'cast',l:'參加角色',t:'textarea',ph:'用「、」分隔，NPC 寫成「名字 (NPC)」',list:'dlChars'}],
+ fam:[{k:'name',l:'家族名',req:1},{k:'members',l:'成員',t:'textarea',ph:'一行一位：名字｜讀音｜稱謂\n例：紀伊野 零｜きいの れい｜大哥'}]
+};
+const BLANK={chars:()=>({type:'oc',year:new Date().getFullYear(),sex:'F'}),co:()=>({}),pj:()=>({year:new Date().getFullYear()}),fam:()=>({})};
+let formImg={};
+const field=(f,v,fid)=>{const id=`${fid}_${f.k}`,lab=`<label for="${id}">${f.l}${f.req?' *':''}</label>`;
+ if(f.t==='select')return `<div class="fld">${lab}<select id="${id}" name="${f.k}">${f.o.map(([k,t])=>`<option value="${k}"${String(v??'')===k?' selected':''}>${t}</option>`).join('')}</select></div>`;
+ if(f.t==='textarea')return `<div class="fld wide">${lab}<textarea id="${id}" name="${f.k}" rows="4" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea></div>`;
+ if(f.t==='image'){formImg[fid]=v||'';return `<div class="fld wide imgf"><span class="lbl">${f.l}</span><div class="imgrow"><span class="pv" id="${fid}_pv"${bg(v)}>${v?'':'未放'}</span><div><label class="btn ghost filebtn">選擇圖片<input type="file" accept="image/*" data-img="${fid}" hidden></label> <button type="button" class="btn ghost" data-clearimg="${fid}">移除</button><p class="hint">會自動裁成正方形、縮成 320px。</p></div></div></div>`}
+ return `<div class="fld">${lab}<input id="${id}" name="${f.k}" ${f.t==='number'?'type="number" inputmode="numeric"':'type="text"'} value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.list?`list="${f.list}"`:''} ${f.req?'required':''}></div>`};
+const formHTML=(col,data,fid,submitLabel)=>`<form class="frm" data-col="${col}" data-fid="${fid}" data-eid="${data.id||''}">${SCHEMA[col].map(f=>field(f,data[f.k],fid)).join('')}<div class="fld wide acts"><button class="btn" type="submit">${submitLabel}</button>${data.id?`<button class="btn ghost danger" type="button" data-del="${col}" data-eid="${data.id}">刪除</button>`:''}<span class="msg" role="status"></span></div></form>`;
+const readForm=fm=>{const fid=fm.dataset.fid,o={};SCHEMA[fm.dataset.col].forEach(f=>{if(f.t==='image')o[f.k]=formImg[fid]||'';else{const el=fm.elements[f.k];o[f.k]=f.t==='number'?(+el.value||0):el.value.trim()}});return o};
+const resizeImg=file=>new Promise((res,rej)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{const Z=320,cv=document.createElement('canvas');cv.width=cv.height=Z;const k=Math.max(Z/img.width,Z/img.height),w=img.width*k,h=img.height*k;const g=cv.getContext('2d');g.fillStyle='#fafafa';g.fillRect(0,0,Z,Z);g.drawImage(img,(Z-w)/2,(Z-h)/2,w,h);URL.revokeObjectURL(url);res(cv.toDataURL('image/jpeg',.85))};img.onerror=()=>rej(new Error('讀不到這張圖片'));img.src=url});
+const datalists=()=>`<datalist id="dlChars">${S.chars.map(c=>`<option value="${esc(c.name)}">`).join('')}</datalist><datalist id="dlPartner">${[...new Set(S.co.map(x=>x.partner))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`;
+const addView=()=>isOwner()?`<div class="addwrap"><h3 class="sub" style="margin-top:0">新增角色</h3><p class="hint" style="text-align:center">存檔後會出現在對應的 ᴏᴄ 或 ᴛʀᴘɢ 分頁，依年份排列。</p>${formHTML('chars',BLANK.chars(),'addf','新增角色')}</div>`:`<p class="empty">只有房主可以新增角色。</p>`;
+
+/* ---------- data writes ---------- */
+const COLS={chars:'characters',co:'co',pj:'projects',fam:'family'};
+async function save(col,id,data){
+ if(!online)throw new Error('尚未連上 Firebase，請先填入設定。');
+ if(!isOwner())throw new Error('只有房主可以編輯。');
+ if(id)await api.setDoc(api.doc(api.db,P+COLS[col],id),data,{merge:true});
+ else{data.order=Date.now();data.createdAt=api.serverTimestamp();await api.addDoc(api.collection(api.db,P+COLS[col]),data)}
+}
+async function del(col,id){if(!online||!isOwner())throw new Error('只有房主可以刪除。');await api.deleteDoc(api.doc(api.db,P+COLS[col],id))}
+async function importSeed(){
+ const btn=$('seedBtn');btn.disabled=true;btn.textContent='匯入中…';
+ const groups=[['chars',seedChars()],['co',seedCo()],['fam',seedFam()],['pj',seedPj()]];
+ let batch=api.writeBatch(api.db),n=0;
+ for(const [col,rows] of groups)for(const r of rows){batch.set(api.doc(api.collection(api.db,P+COLS[col])),r);if(++n%400===0){await batch.commit();batch=api.writeBatch(api.db)}}
+ await batch.commit();toast('原始名單已匯入');
+}
+
+/* ---------- render ---------- */
+const LABEL={oc:'ᴏᴄ',trpg:'ᴛʀᴘɢ',co:'ᴄᴏ',project:'ᴘʀᴏᴊᴇᴄᴛ',add:'新增'};
+const curRoute=()=>{const r=location.hash.slice(1);return LABEL[r]&&(r!=='add'||isOwner())?r:'oc'};
+function render(){
+ const r=curRoute();
+ $('addTab').hidden=!isOwner();
+ document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+r?'page':'false'));
+ const emptyAll=ready&&online&&!S.chars.length&&!S.co.length&&!S.pj.length;
+ const seed=emptyAll&&isOwner()?`<div class="gate"><p>資料庫還是空的。要把原本試算表的角色名單匯入嗎？</p><button class="btn" id="seedBtn">匯入原始名單</button></div>`:'';
+ const body={oc:()=>roster(chars('oc')),trpg:()=>trOpen?roster(chars('trpg')):gate(),co:coView,project:pjView,add:addView}[r]();
+ // keep the add form's typed values if re-rendered by a snapshot
+ if(r==='add'&&view.querySelector('form[data-fid="addf"]')&&!view.dataset.reset){syncCharm();renderAuth();return}
+ delete view.dataset.reset;
+ view.innerHTML=seed+(ready||!online?body:'<p class="empty">讀取中…</p>')+datalists();
+ syncCharm();renderAuth();
+}
+function renderAuth(){
+ const a=$('auth');
+ if(!online){a.innerHTML="";return}
+ if(!user){a.innerHTML=`<button class="authbtn" id="loginBtn">房主登入</button>`;return}
+ a.innerHTML=`${isOwner()?'<span class="own">房主</span>':'<span class="npc">訪客</span>'}<button class="authbtn" id="logoutBtn">登出</button>`;
+}
+let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2400)}
+
+/* ---------- detail dialog ---------- */
+const ov=$('ov'),dlg=$('dlg');let lastFocus=null,curId=null;
+function openChar(id){
+ const c=byId(id);if(!c)return;if(!ov.classList.contains('on'))lastFocus=document.activeElement;curId=id;
+ const co=coOf(c),pj=pjOf(c),fam=famOf(c);
+ dlg.innerHTML=`<button class="close" aria-label="關閉">✕</button>
+ <div class="kind">${c.type==='oc'?'✶ ᴏᴄ':'✱ ᴛʀᴘɢ'}　${c.year}</div>
+ <div class="big"${bg(c.avatar)}>${c.avatar?'':'尚未放頭貼'}</div>
+ ${c.reading?`<p class="rd">${esc(c.reading)}</p>`:''}<h2 id="dn">${esc(c.name)}</h2>
+ <p class="stat">${esc(stat(c))}</p>${c.job?`<p class="stat">${esc(c.job)}</p>`:''}
+ ${isOwner()?`<div class="avbtns"><button class="btn ghost" data-edit="chars" data-eid="${c.id}">編輯這位角色</button></div>`:''}
+ ${co.length?`<h5>CO 配對</h5><ul>${co.map(x=>`<li>${x.arl?esc(x.arl)+'，':''}與 <b>${esc(x.b||'未填名')}</b>${x.brl?`（${esc(x.brl)}）`:''}${x.tag?`　<span class="npc">${esc(x.tag)}</span>`:''}<br><span class="npc">合作：${esc(x.partner)}</span></li>`).join('')}</ul>`:''}
+ ${fam.length?`<h5>家族</h5><ul>${fam.map(f=>`<li>${esc(f.name)} 家：${famMembers(f).map(m=>`${esc(m[0]||'未填名')}（${esc(m[2]||'')}）`).join('、')}</li>`).join('')}</ul>`:''}
+ ${pj.length?`<h5>參加企劃</h5><ul>${pj.map(p=>`<li>${p.year} ${esc(p.month)}　${esc(p.name||'企劃名未填')}</li>`).join('')}</ul>`:''}`;
+ showDlg();
+}
+function openForm(col,id){
+ if(!ov.classList.contains('on'))lastFocus=document.activeElement;curId=null;
+ const data=id?(col==='chars'?byId(id):S[col].find(x=>x.id===id)):BLANK[col]();if(!data)return;
+ const title={chars:'角色',co:'配對',pj:'企劃',fam:'家族'}[col];
+ dlg.innerHTML=`<button class="close" aria-label="關閉">✕</button><h2 id="dn" style="font-size:20px;margin-bottom:12px">${id?'編輯':'新增'}${title}</h2>${formHTML(col,data,'dlgf',id?'儲存':'新增')}${datalists()}`;
+ showDlg();
+}
+const showDlg=()=>{ov.classList.add('on');dlg.scrollTop=0;dlg.querySelector('.close').focus()};
+const closeDlg=()=>{ov.classList.remove('on');curId=null;if(lastFocus&&document.contains(lastFocus))lastFocus.focus()};
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{
+ const t=e.target;
+ if(t.closest('#loginBtn')){try{await api.signInWithPopup(api.auth,new api.GoogleAuthProvider())}catch(err){toast('登入失敗：'+(err.code||err.message))}return}
+ if(t.closest('#logoutBtn')){await api.signOut(api.auth);return}
+ if(t.id==='openTr'){trOpen=true;try{sessionStorage.setItem('trOpen','1')}catch(err){}render();return}
+ if(t.id==='seedBtn'){try{await importSeed()}catch(err){toast('匯入失敗：'+err.message);t.disabled=false;t.textContent='匯入原始名單'}return}
+ const ed=t.closest('[data-edit]');if(ed){e.stopPropagation();setOvw(false);openForm(ed.dataset.edit,ed.dataset.eid);return}
+ const ci=t.closest('[data-clearimg]');if(ci){const fid=ci.dataset.clearimg;formImg[fid]='';const pv=$(fid+'_pv');pv.style.backgroundImage='';pv.textContent='未放';return}
+ const dl=t.closest('[data-del]');if(dl){
+  if(dl.dataset.armed!=='1'){dl.dataset.armed='1';dl.textContent='再按一次確認刪除';return}
+  try{await del(dl.dataset.del,dl.dataset.eid);closeDlg();toast('已刪除')}catch(err){toast(err.message)}return}
+ if(ov.classList.contains('on')&&(t===ov||t.closest('#dlg .close'))){closeDlg();return}
+ if(t.closest('#charm')){e.stopPropagation();charm.classList.remove('swing');void charm.offsetWidth;charm.classList.add('swing');setOvw(!ovw.classList.contains('on'));return}
+ const c=t.closest('[data-id]');if(c&&!t.closest('form')){if(t.closest('#ovw'))e.stopPropagation();openChar(c.dataset.id);return}
+ if(ovw.classList.contains('on')&&!t.closest('#ovw')&&!ov.contains(t))setOvw(false);
+});
+document.addEventListener('change',async e=>{
+ const f=e.target.closest('[data-img]');if(!f||!f.files[0])return;const fid=f.dataset.img;
+ try{const u=await resizeImg(f.files[0]);formImg[fid]=u;const pv=$(fid+'_pv');pv.style.backgroundImage=`url('${u}')`;pv.textContent=''}catch(err){toast(err.message)}
+});
+document.addEventListener('submit',async e=>{
+ const fm=e.target.closest('form.frm');if(!fm)return;e.preventDefault();
+ const msg=fm.querySelector('.msg'),btn=fm.querySelector('[type=submit]'),col=fm.dataset.col,id=fm.dataset.eid,data=readForm(fm);
+ btn.disabled=true;msg.textContent='儲存中…';
+ try{await save(col,id,data);
+  if(fm.dataset.fid==='addf'){view.dataset.reset='1';formImg.addf='';toast(`已新增「${data.name}」`);render()}
+  else{closeDlg();toast(id?'已儲存':'已新增')}
+ }catch(err){msg.textContent=err.message;btn.disabled=false}
+});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(ov.classList.contains('on'))closeDlg();else if(ovw.classList.contains('on')){setOvw(false);charm.focus()}});
+window.addEventListener('hashchange',()=>{view.dataset.reset='1';render()});
+
+/* ---------- charm overview ---------- */
+const charm=$('charm'),ovw=$('ovw');
+const nameLink=c=>`<button class="link" data-id="${c.id}">${esc(c.name)}</button>`;
+const nm=s=>{const c=s&&String(s).split('＆').length===1?findChar(s):null;return c?nameLink(c):esc(s||'未填名')};
+const ovwHTML=r=>{
+ if(r==='oc'||r==='trpg'){const L=chars(r);if(r==='trpg'&&!trOpen)return `<h3>${LABEL[r]}</h3><p class="npc">TRPG 角卡可能會劇透，先在頁面上打開再看總覽。</p>`;
+  return `<h3>${LABEL[r]}　${L.length}</h3>`+[...new Set(L.map(c=>c.year))].map(y=>`<h4>${y}</h4><p>${L.filter(c=>c.year===y).map(nameLink).join('、')}</p>`).join('')}
+ if(r==='co'){const L=coSorted();return `<h3>${LABEL[r]}　${L.length}</h3>`+[...new Set(L.map(x=>x.partner))].map(p=>`<h4>${esc(p)}</h4><p>${L.filter(x=>x.partner===p).map(x=>`${nm(x.a)} ✶ ${esc(x.b||'未填名')}`).join('<br>')}</p>`).join('')+(S.fam.length?`<h4>家族</h4><p>${S.fam.map(f=>famMembers(f).filter(m=>m[0]).map(m=>nm(m[0])).join('、')).join('<br>')}</p>`:'')}
+ if(r==='add')return `<h3>新增</h3><p class="npc">目前共有 ᴏᴄ ${chars('oc').length} 位、ᴛʀᴘɢ ${chars('trpg').length} 位。</p>`;
+ return `<h3>${LABEL[r]}</h3>`+pjSorted().map(i=>`<h4>${i.year} ${esc(i.month)}　${esc(i.name||'企劃名未填')}</h4><p>${castList(i).map(s=>nm(s.replace(/\s*\(NPC\)/,''))).join('、')}</p>`).join('');
+};
+const countOf=r=>r==='oc'?chars('oc').length:r==='trpg'?chars('trpg').length:r==='co'?S.co.length:r==='project'?S.pj.length:S.chars.length;
+function syncCharm(){const r=curRoute();$('charmT').textContent=LABEL[r];$('charmN').textContent=countOf(r);if(ovw.classList.contains('on'))ovw.innerHTML=ovwHTML(r)}
+function setOvw(on){ovw.classList.toggle('on',on);charm.setAttribute('aria-expanded',on);if(on)ovw.innerHTML=ovwHTML(curRoute())}
+
+/* ---------- boot ---------- */
+async function boot(){
+ if(!FIREBASE_CONFIG.apiKey){
+  S.chars=seedChars().map((c,i)=>({...c,id:'s'+i}));S.co=seedCo().map((c,i)=>({...c,id:'c'+i}));S.fam=seedFam().map((c,i)=>({...c,id:'f'+i}));S.pj=seedPj().map((c,i)=>({...c,id:'p'+i}));
+  $('banner').hidden=false;ready=true;render();return;
+ }
+ const V='10.12.2',base=`https://www.gstatic.com/firebasejs/${V}/`;
+ const [A,AU,FS]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
+ const app=A.initializeApp(FIREBASE_CONFIG),auth=AU.getAuth(app),db=FS.getFirestore(app);
+ api={auth,db,GoogleAuthProvider:AU.GoogleAuthProvider,signInWithPopup:AU.signInWithPopup,signOut:AU.signOut,collection:FS.collection,doc:FS.doc,addDoc:FS.addDoc,setDoc:FS.setDoc,deleteDoc:FS.deleteDoc,writeBatch:FS.writeBatch,serverTimestamp:FS.serverTimestamp};
+ online=true;
+ AU.onAuthStateChanged(auth,u=>{user=u;view.dataset.reset='1';render()});
+ const loaded=new Set();
+ for(const [k,col] of Object.entries(COLS)){
+  FS.onSnapshot(FS.collection(db,P+col),snap=>{
+   S[k]=snap.docs.map(d=>({id:d.id,...d.data()}));
+   loaded.add(k);if(!ready&&loaded.size>=4)ready=true;
+   if(ready){render();if(curId&&ov.classList.contains('on')){byId(curId)?openChar(curId):closeDlg()}}
+  },err=>{$('view').innerHTML=`<p class="empty">讀取失敗：${esc(err.message)}<br>請確認 Firestore 規則允許讀取。</p>`});
+ }
+ render();
+}
+boot().catch(err=>{view.innerHTML=`<p class="empty">網站啟動失敗：${esc(err.message)}</p>`});
+
+</script>
+</body>
+</html>
