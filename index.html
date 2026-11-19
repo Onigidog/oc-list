@@ -153,6 +153,9 @@ main.band{position:relative}
 #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#282828;color:#fafafa;padding:10px 18px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 nav a[hidden]{display:none}
+.authtab{display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;min-height:72px;margin-top:18px;padding:12px 0;background:#ececec;color:#777;font-size:13px;font-weight:700;letter-spacing:.14em;border:1px dashed #c8c8c8;border-right:0;border-radius:8px 0 0 8px;margin-right:-1px}
+.authtab:hover{background:#e3e3e3;color:var(--ink)}
+
 @media(max-width:600px){.frm{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
@@ -188,8 +191,9 @@ nav a[hidden]{display:none}
 <div id="ovw" role="dialog" aria-label="本頁角色總覽"></div>
 <div class="shell"><nav aria-label="分頁"><div class="wrap" id="tabs">
 <a href="#oc">ᴏᴄ</a><a href="#trpg">ᴛʀᴘɢ</a><a href="#co">ᴄᴏ</a><a href="#project">ᴘʀᴏᴊᴇᴄᴛ</a><a href="#add" id="addTab" hidden>新增</a>
+<button id="authTab" class="authtab" type="button">登入</button>
 </div></nav>
-<main class="band"><div id="auth"></div><div class="wrap"><div id="banner" hidden>預覽模式：還沒讀到 config.js 裡的 Firebase 設定，目前顯示的是原始名單，不能編輯。</div><div id="view"></div></div></main></div>
+<main class="band"><div id="auth"></div><div class="wrap"><div id="view"></div></div></main></div>
 <div id="ov" role="dialog" aria-modal="true" aria-labelledby="dn"><div id="dlg"></div></div>
 <div id="toast" role="status"></div>
 <script type="module">
@@ -454,10 +458,8 @@ function render(){
  syncCharm();renderAuth();
 }
 function renderAuth(){
- const a=$('auth');
- if(!online){a.innerHTML="";return}
- if(!user){a.innerHTML=`<button class="authbtn" id="loginBtn">房主登入</button>`;return}
- a.innerHTML=`${isOwner()?'<span class="own">房主</span>':'<span class="npc">訪客</span>'}<button class="authbtn" id="logoutBtn">登出</button>`;
+ const t=$('authTab');t.textContent=user?'登出':'登入';t.setAttribute('aria-label',user?'登出':'房主登入');
+ $('auth').innerHTML=isOwner()?'<span class="own">房主</span>':user?'<span class="npc">這個帳號沒有編輯權限</span>':'';
 }
 let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2400)}
 
@@ -490,8 +492,10 @@ const closeDlg=()=>{ov.classList.remove('on');curId=null;if(lastFocus&&document.
 /* ---------- events ---------- */
 document.addEventListener('click',async e=>{
  const t=e.target;
- if(t.closest('#loginBtn')){try{await api.signInWithPopup(api.auth,new api.GoogleAuthProvider())}catch(err){toast('登入失敗：'+(err.code||err.message))}return}
- if(t.closest('#logoutBtn')){await api.signOut(api.auth);return}
+ if(t.closest('#authTab')){
+  if(!online){toast('還沒設定 config.js，無法登入');return}
+  if(user){await api.signOut(api.auth);toast('已登出');return}
+  try{await api.signInWithPopup(api.auth,new api.GoogleAuthProvider())}catch(err){if(err.code!=='auth/popup-closed-by-user')toast('登入失敗：'+(err.code||err.message))}return}
  if(t.id==='openTr'){trOpen=true;try{sessionStorage.setItem('trOpen','1')}catch(err){}render();return}
  if(t.id==='seedBtn'){try{await importSeed()}catch(err){toast('匯入失敗：'+err.message);t.disabled=false;t.textContent='匯入原始名單'}return}
  const ed=t.closest('[data-edit]');if(ed){e.stopPropagation();setOvw(false);openForm(ed.dataset.edit,ed.dataset.eid);return}
@@ -539,7 +543,7 @@ function setOvw(on){ovw.classList.toggle('on',on);charm.setAttribute('aria-expan
 async function boot(){
  if(!FIREBASE_CONFIG.apiKey){
   S.chars=seedChars().map((c,i)=>({...c,id:'s'+i}));S.co=seedCo().map((c,i)=>({...c,id:'c'+i}));S.fam=seedFam().map((c,i)=>({...c,id:'f'+i}));S.pj=seedPj().map((c,i)=>({...c,id:'p'+i}));
-  $('banner').hidden=false;ready=true;render();return;
+  console.info('預覽模式：還沒讀到 config.js 的 Firebase 設定');ready=true;render();return;
  }
  const V='10.12.2',base=`https://www.gstatic.com/firebasejs/${V}/`;
  const [A,AU,FS]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
