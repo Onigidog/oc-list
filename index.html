@@ -189,24 +189,14 @@ nav a[hidden]{display:none}
 <div class="shell"><nav aria-label="分頁"><div class="wrap" id="tabs">
 <a href="#oc">ᴏᴄ</a><a href="#trpg">ᴛʀᴘɢ</a><a href="#co">ᴄᴏ</a><a href="#project">ᴘʀᴏᴊᴇᴄᴛ</a><a href="#add" id="addTab" hidden>新增</a>
 </div></nav>
-<main class="band"><div id="auth"></div><div class="wrap"><div id="banner" hidden>預覽模式：還沒填入 Firebase 設定，目前顯示的是原始名單，不能編輯。</div><div id="view"></div></div></main></div>
+<main class="band"><div id="auth"></div><div class="wrap"><div id="banner" hidden>預覽模式：還沒讀到 config.js 裡的 Firebase 設定，目前顯示的是原始名單，不能編輯。</div><div id="view"></div></div></main></div>
 <div id="ov" role="dialog" aria-modal="true" aria-labelledby="dn"><div id="dlg"></div></div>
 <div id="toast" role="status"></div>
 <script type="module">
-// =====================================================================
-//  設定：把 Firebase 專案設定貼在這裡，OWNER_EMAIL 填你的 Google 帳號
-// =====================================================================
-const FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
-};
-const OWNER_EMAIL = "";          // 只有這個 Google 帳號可以編輯
-const P = "roster_";             // Firestore 集合前綴，可和浮生閣共用同一個專案
-// =====================================================================
+// 連線設定放在同一個資料夾的 config.js，更新網站只換這個 index.html
+let FIREBASE_CONFIG={},OWNER_EMAIL="";
+try{const m=await import('./config.js');FIREBASE_CONFIG=m.firebaseConfig||{};OWNER_EMAIL=m.OWNER_EMAIL||""}catch(e){console.warn('找不到 config.js，改用預覽模式')}
+const P="roster_";
 
 const OC_RAW=`2026|김천세|金千歲|F|17|162|高中生
 2026|Daru Rajput|達魯・拉傑普特|M|16|188|高中生
