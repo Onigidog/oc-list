@@ -71,12 +71,25 @@ header .sp{flex:1}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 @media(max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}.fcol{position:static}.list{max-height:none}}
 @media(max-width:520px){.frm{grid-template-columns:minmax(0,1fr)}}
+#crop{position:fixed;inset:0;z-index:40;background:rgb(40 40 40/.55);display:none;align-items:center;justify-content:center;padding:16px}
+#crop.on{display:flex}
+.cropbox{background:var(--card);width:min(420px,100%);padding:18px 18px 16px;border:1px solid #d6d6d6}
+.cropbox h2{margin:0 0 4px;font-size:16px}.cropbox p{margin:0 0 12px;font-size:13px;color:var(--mute)}
+#cropStage{position:relative;overflow:hidden;background:#3a3a3a;touch-action:none;cursor:grab;user-select:none}
+#cropStage:active{cursor:grabbing}
+#cropImg{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none;-webkit-user-drag:none}
+#cropFrame{position:absolute;box-shadow:0 0 0 9999px rgb(40 40 40/.55);outline:1px solid #fafafa;pointer-events:none;
+ background:linear-gradient(#fafafa66,#fafafa66) 33.33% 0/1px 100% no-repeat,linear-gradient(#fafafa66,#fafafa66) 66.66% 0/1px 100% no-repeat,linear-gradient(#fafafa66,#fafafa66) 0 33.33%/100% 1px no-repeat,linear-gradient(#fafafa66,#fafafa66) 0 66.66%/100% 1px no-repeat}
+.zrow{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:13px;color:#666}
+.zrow input{flex:1;accent-color:var(--acc);min-height:32px}
+.cropacts{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
 </style>
 </head>
 <body>
 <header><h1>角色名冊<small>後台</small></h1><a class="lnk" href="index.html" target="_blank" rel="noopener">查看網站</a><span class="sp"></span><div id="who"></div></header>
 <main id="app"><div class="center"><p>讀取中…</p></div></main>
 <div id="toast" role="status"></div>
+<div id="crop" role="dialog" aria-modal="true" aria-labelledby="cropT"><div class="cropbox"><h2 id="cropT">裁切頭貼</h2><p>拖曳圖片調整位置，用滑桿、滾輪或雙指縮放。框內就是頭貼範圍。</p><div id="cropStage"><img id="cropImg" alt=""><div id="cropFrame"></div></div><div class="zrow"><span>縮小</span><input type="range" id="cropZoom" min="1" max="5" step="0.01" value="1" aria-label="縮放"><span>放大</span></div><div class="cropacts"><button type="button" class="btn ghost" id="cropCancel">取消</button><button type="button" class="btn" id="cropOk">使用這個範圍</button></div></div></div>
 <script type="module">
 
 // 連線設定放在同一個資料夾的 config.js，更新網站只換 html 檔
@@ -270,7 +283,7 @@ let tab='chars',editing={chars:null,co:null,fam:null,pj:null},img='',filt={type:
 const field=(f,v)=>{const id='f_'+f.k,lab=`<label for="${id}">${f.l}${f.req?' *':''}</label>`,w=f.t==='textarea'||f.t==='image'||f.wide?' wide':'';
  if(f.t==='select')return `<div class="fld">${lab}<select id="${id}" name="${f.k}">${f.o.map(([k,t])=>`<option value="${k}"${String(v??'')===k?' selected':''}>${t}</option>`).join('')}</select></div>`;
  if(f.t==='textarea')return `<div class="fld${w}">${lab}<textarea id="${id}" name="${f.k}" rows="5" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea></div>`;
- if(f.t==='image'){img=v||'';return `<div class="fld wide"><span class="lbl">${f.l}</span><div class="imgrow"><span class="pv" id="pv"${bg(img)}>${img?'':'未放'}</span><label class="btn ghost filebtn">選擇圖片<input type="file" accept="image/*" id="imgIn" hidden></label><button type="button" class="btn ghost" id="imgClr">移除</button></div></div>`}
+ if(f.t==='image'){img=v||'';return `<div class="fld wide"><span class="lbl">${f.l}</span><div class="imgrow"><span class="pv" id="pv"${bg(img)}>${img?'':'未放'}</span><label class="btn ghost filebtn">選擇圖片<input type="file" accept="image/*" id="imgIn" hidden></label><button type="button" class="btn ghost" id="imgDl">下載</button><button type="button" class="btn ghost" id="imgClr">移除</button></div></div>`}
  return `<div class="fld${w}">${lab}<input id="${id}" name="${f.k}" ${f.t==='number'?'type="number" inputmode="numeric"':'type="text"'} value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.list?`list="${f.list}"`:''} ${f.req?'required':''} autocomplete="off"></div>`};
 const formHTML=col=>{const id=editing[col],d=id?S[col].find(x=>x.id===id):BLANK[col]();
  return `<form class="frm" id="frm" data-col="${col}"><div class="fhead"><h2>${id?`編輯${TITLE[col]}：${esc(d.name||d.a||'')}`:`新增${TITLE[col]}`}</h2>${id?'<button type="button" class="lnk" id="cancelEdit">取消編輯</button>':''}</div>
@@ -327,6 +340,39 @@ async function importSeed(){
  await batch.commit();return n;
 }
 
+
+/* ---------- square cropper ---------- */
+function cropImage(file){return new Promise((resolve,reject)=>{
+ const url=URL.createObjectURL(file),im=new Image();
+ im.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('讀不到這張圖片'))};
+ im.onload=()=>{
+  const W=im.naturalWidth,H=im.naturalHeight,box=$('crop'),stage=$('cropStage'),pic=$('cropImg'),zoom=$('cropZoom');
+  pic.src=url;box.classList.add('on');
+  let SZ,PAD,base,k,tx,ty;const ptrs=new Map();let last=null,pinch=null;
+  const layout=()=>{const sw=stage.clientWidth;PAD=Math.round(sw*.1);SZ=sw-2*PAD;stage.style.height=sw+'px';const f=$('cropFrame');f.style.left=f.style.top=PAD+'px';f.style.width=f.style.height=SZ+'px';base=Math.max(SZ/W,SZ/H)};
+  const clamp=()=>{const w=W*k,h=H*k;tx=Math.min(PAD,Math.max(PAD+SZ-w,tx));ty=Math.min(PAD,Math.max(PAD+SZ-h,ty))};
+  const draw=()=>{clamp();pic.style.width=W*k+'px';pic.style.height=H*k+'px';pic.style.transform=`translate(${tx}px,${ty}px)`};
+  const zoomTo=(nk,cx=PAD+SZ/2,cy=PAD+SZ/2)=>{nk=Math.min(base*5,Math.max(base,nk));const ix=(cx-tx)/k,iy=(cy-ty)/k;k=nk;tx=cx-ix*k;ty=cy-iy*k;zoom.value=k/base;draw()};
+  layout();k=base;tx=PAD+(SZ-W*k)/2;ty=PAD+(SZ-H*k)/2;zoom.value=1;draw();
+  const pos=e=>{const r=stage.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+  const down=e=>{stage.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,pos(e));last=pos(e);if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),k}}};
+  const move=e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,pos(e));
+   if(ptrs.size===2&&pinch){const [a,b]=[...ptrs.values()];zoomTo(pinch.k*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d,(a[0]+b[0])/2,(a[1]+b[1])/2);return}
+   const p=pos(e);tx+=p[0]-last[0];ty+=p[1]-last[1];last=p;draw()};
+  const up=e=>{ptrs.delete(e.pointerId);pinch=null;if(ptrs.size===1)last=[...ptrs.values()][0]};
+  const wheel=e=>{e.preventDefault();const [x,y]=pos(e);zoomTo(k*(e.deltaY<0?1.08:1/1.08),x,y)};
+  const zin=()=>zoomTo(base*+zoom.value);
+  const key=e=>{if(e.key==='Escape')finish(null);if(e.key==='Enter'&&e.target.tagName!=='BUTTON')ok()};
+  const ok=()=>{const OUT=400,cv=document.createElement('canvas');cv.width=cv.height=OUT;const g=cv.getContext('2d');g.fillStyle='#fafafa';g.fillRect(0,0,OUT,OUT);g.imageSmoothingQuality='high';
+   g.drawImage(im,(PAD-tx)/k,(PAD-ty)/k,SZ/k,SZ/k,0,0,OUT,OUT);finish(cv.toDataURL('image/jpeg',.88))};
+  const finish=v=>{box.classList.remove('on');stage.removeEventListener('pointerdown',down);stage.removeEventListener('pointermove',move);stage.removeEventListener('pointerup',up);stage.removeEventListener('pointercancel',up);stage.removeEventListener('wheel',wheel);zoom.removeEventListener('input',zin);document.removeEventListener('keydown',key);$('cropOk').onclick=$('cropCancel').onclick=null;window.removeEventListener('resize',rs);URL.revokeObjectURL(url);pic.removeAttribute('src');resolve(v)};
+  const rs=()=>{const cx=(PAD+SZ/2-tx)/k/W,cy=(PAD+SZ/2-ty)/k/H,rel=k/base;layout();k=base*rel;tx=PAD+SZ/2-cx*W*k;ty=PAD+SZ/2-cy*H*k;draw()};
+  stage.addEventListener('pointerdown',down);stage.addEventListener('pointermove',move);stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);stage.addEventListener('wheel',wheel,{passive:false});zoom.addEventListener('input',zin);document.addEventListener('keydown',key);window.addEventListener('resize',rs);
+  $('cropOk').onclick=ok;$('cropCancel').onclick=()=>finish(null);$('cropOk').focus();
+ };
+ im.src=url;
+})}
+
 /* ---------- events ---------- */
 document.addEventListener('click',async e=>{
  const t=e.target;
@@ -335,13 +381,14 @@ document.addEventListener('click',async e=>{
  const tb=t.closest('[data-tab]');if(tb){tab=tb.dataset.tab;renderPane(true);return}
  const pk=t.closest('[data-pick]');if(pk){editing[tab]=pk.dataset.pick;renderPane(true);document.querySelector('.fcol').scrollIntoView({block:'start',behavior:'smooth'});return}
  if(t.id==='cancelEdit'){editing[tab]=null;renderPane(true);return}
+ if(t.id==='imgDl'){if(!img){toast('還沒有頭貼可以下載');return}const n=($('f_name')?.value||'').trim()||'頭貼',a=document.createElement('a');a.href=img;a.download=n.replace(/[\\/:*?"<>|]/g,'_')+'.jpg';document.body.appendChild(a);a.click();a.remove();return}
  if(t.id==='imgClr'){img='';const pv=$('pv');pv.style.backgroundImage='';pv.textContent='未放';return}
  if(t.id==='delBtn'){if(t.dataset.armed!=='1'){t.dataset.armed='1';t.textContent='再按一次確認刪除';return}
   try{await api.deleteDoc(api.doc(api.db,P+COLS[tab],editing[tab]));editing[tab]=null;renderPane(true);toast('已刪除')}catch(err){toast('刪除失敗：'+err.message)}return}
  if(t.id==='seedBtn'){t.disabled=true;$('seedMsg').textContent='匯入中…';try{const n=await importSeed();toast(`已匯入 ${n} 筆`)}catch(err){$('seedMsg').textContent='匯入失敗：'+err.message;t.disabled=false}return}
 });
 document.addEventListener('change',async e=>{
- if(e.target.id==='imgIn'&&e.target.files[0]){try{img=await resizeImg(e.target.files[0]);const pv=$('pv');pv.style.backgroundImage=`url('${img}')`;pv.textContent=''}catch(err){toast(err.message)}}
+ if(e.target.id==='imgIn'&&e.target.files[0]){const f=e.target.files[0];e.target.value='';try{const u=await cropImage(f);if(u){img=u;const pv=$('pv');pv.style.backgroundImage=`url('${img}')`;pv.textContent=''}}catch(err){toast(err.message)}}
  if(e.target.id==='ft'){filt.type=e.target.value;$('lcol').innerHTML=listHTML(tab)}
 });
 document.addEventListener('input',e=>{if(e.target.id==='fq'){filt.q=e.target.value;$('lcol').innerHTML=listHTML(tab);const q=$('fq');q.focus();q.setSelectionRange(q.value.length,q.value.length)}});
