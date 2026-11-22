@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>角色名冊・後台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Admin: same paper, greys and #aaa55a as the public site, stripped to a calm data-entry tool. */
+:root{color-scheme:light;--bg:#ececec;--card:#fafafa;--ink:#282828;--mute:#888;--line:#e4e4e4;--acc:#aaa55a}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 "Noto Sans TC",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:14px max(4vw,16px);background:var(--card);border-bottom:1px solid #d9d9d9}
+header h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.1em}
+header h1 small{font-weight:400;color:var(--mute);letter-spacing:0;margin-left:6px}
+header .sp{flex:1}
+#who{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--mute)}
+.lnk{border:0;background:none;color:var(--mute);text-decoration:underline;text-underline-offset:3px;padding:6px 2px;font-size:13px}
+.lnk:hover{color:var(--ink)}
+#app{max-width:1180px;margin:0 auto;padding:20px max(4vw,16px) 60px}
+.center{max-width:420px;margin:12vh auto 0;background:var(--card);border:1px solid #dcdcdc;padding:32px 28px;text-align:center}
+.center h2{margin:0 0 6px;font-size:20px}.center p{color:#666;margin:0 0 18px}
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid #d6d6d6;margin-bottom:18px}
+.tabs button{flex:none;border:0;background:none;padding:10px 18px;min-height:44px;color:var(--mute);font-weight:700;border-bottom:2px solid transparent}
+.tabs button[aria-selected=true]{color:var(--ink);border-color:var(--acc)}
+.cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
+.fcol,.lcol,.imp{background:var(--card);border:1px solid #dcdcdc;padding:18px 20px}
+.fcol{position:sticky;top:12px}
+.fhead{grid-column:1/-1;display:flex;align-items:baseline;gap:12px}
+.fhead h2,.lhead h2,.imp h2{margin:0;font-size:16px}
+.frm{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
+.fld{display:flex;flex-direction:column;gap:3px}.fld.wide{grid-column:1/-1}
+.fld label,.fld .lbl{font-size:12px;color:#666;font-weight:700}
+.fld input,.fld select,.fld textarea,.ltools input,.ltools select{font:inherit;font-size:16px;padding:8px 10px;border:1px solid #d4d4d4;background:#fafafa;color:var(--ink);min-height:42px;border-radius:0;width:100%}
+.fld input:focus,.fld select:focus,.fld textarea:focus,.ltools input:focus{outline:none;border-color:var(--acc)}
+.fld textarea{resize:vertical;line-height:1.6}
+.imgrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.pv{flex:none;width:72px;height:72px;background:#f0f0f0 center/cover no-repeat;border:1px solid var(--line);display:grid;place-items:center;color:#bbb;font-size:12px}
+.btn{background:var(--ink);color:#fafafa;border:1px solid var(--ink);padding:8px 20px;min-height:42px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.ghost{background:#fafafa;color:var(--ink);border-color:#cfcfcf}
+.btn.danger{color:#a33;border-color:#dcbcbc}
+.filebtn{display:inline-flex;align-items:center}
+.acts{flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;margin-top:4px}
+.msg{font-size:13px;color:#a33}
+.lhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.cnt{font-size:13px;color:var(--mute)}
+.ltools{display:grid;grid-template-columns:7em minmax(0,1fr);gap:8px;margin-bottom:10px}
+.list{list-style:none;margin:0;padding:0;max-height:70vh;overflow:auto;border-top:1px solid var(--line)}
+.list li{border-bottom:1px solid var(--line)}
+.list .none{padding:14px 4px;color:var(--mute)}
+.item{all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:10px;align-items:center;width:100%;padding:8px 6px;min-height:48px}
+.item:hover{background:#f2f2f2}.item.sel{background:#efeee2;box-shadow:inset 3px 0 var(--acc)}
+.item:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.th{flex:none;width:38px;height:38px;background:#eee center/cover no-repeat;border:1px solid var(--line)}
+.item .main{flex:1;display:flex;flex-direction:column}
+.item b{font-weight:700;font-size:15px;line-height:1.35}
+.item i{font-style:normal;font-size:12px;color:var(--mute);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .meta{flex:none;font-size:12px;color:#666;text-align:right;line-height:1.45}
+.imp{max-width:640px}.imp p{color:#555;margin:6px 0 14px}
+.imp table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px}
+.imp th,.imp td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+.imp td:nth-child(2),.imp td:nth-child(3){text-align:right}
+.imp th{font-size:12px;color:#666}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:#fafafa;padding:9px 18px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:820px){.cols{grid-template-columns:minmax(0,1fr)}.fcol{position:static}.list{max-height:none}}
+@media(max-width:520px){.frm{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>角色名冊<small>後台</small></h1><a class="lnk" href="index.html" target="_blank" rel="noopener">查看網站</a><span class="sp"></span><div id="who"></div></header>
+<main id="app"><div class="center"><p>讀取中…</p></div></main>
+<div id="toast" role="status"></div>
+<script type="module">
+
+// 連線設定放在同一個資料夾的 config.js，更新網站只換 html 檔
+let FIREBASE_CONFIG={},OWNER_EMAIL="";
+try{const m=await import('./config.js');FIREBASE_CONFIG=m.firebaseConfig||{};OWNER_EMAIL=m.OWNER_EMAIL||""}catch(e){console.warn('找不到 config.js，改用預覽模式')}
+const P="roster_";
+
+const OC_RAW=`2026|김천세|金千歲|F|17|162|高中生
+2026|Daru Rajput|達魯・拉傑普特|M|16|188|高中生
+2026|Vaurien|沃里安|M|-|-|
+2026||笑尾|F|-|-|青樓老闆娘
+2026||莫笑|M|-|-|
+2025|ゆうき さいさい|幽奇 歲歲|F|12|143|
+2025|ゆうき おにに|幽奇 鬼鬼||||
+2025|Varin|瓦林|M|-|-|
+2025|이수유|李秀宥|F|21|156|大學生
+2025|しめ ミッシェル|七五三 米歇爾|M|17|188|高中生
+2025|のざき のら|野崎 野良|F|18|146|高中生
+2025|たちばな なお|橘 名尾|M|16|178|高中生
+2025||小柑|F|3|144|
+2025|Asher·Maddox|艾許・馬多克斯||||
+2025|Liam·Maddox|利亞姆・馬多克斯||||
+2024|きんざき あきよ|金咲 朗代|F|?|167|
+2024|すが|須賀|M|?|188|
+2023|みらか りょう|三樂坂 良|M|17|167|高中生
+2022|やぎさわ にき|八木澤 仁季|F|17|160|
+2022|やぎさわ にや|八木澤 仁弥|M|16|168|
+2022|Charlotte|夏洛特|F|17|163|
+2022|Charles|查爾斯|M|17|163|
+2022|Randolph Morgan|藍道夫・摩根|M|17|180|
+2022|Elaine Brown|伊蓮恩・布朗|F|14|150|
+2022|Canary|金絲雀|F|16|160|
+2022|Louis|路易斯|M||176|
+2022|いちのせ りょうすけ|一之瀬 涼介|M|16|168|
+2022|いちのせ じゅん|一之瀬 潤|M|16|174|
+2022|Luka Siveston|露卡・西維斯頓|F|15|144|
+2022|Selwyn Siveston|賽爾文・西維斯頓|M|18|182|
+2022|こいずみ|小泉|F|15|158|
+2022|Cyno|賽諾|M|-|179.9|
+2021|かもん こくり|嘉門 穀里|M|17|179|
+2021|かもん ありお|嘉門 有生|F|18|176|
+2021|おのせ むみ|小野瀨 橆実|F|17|169|
+2021|あさくら とうま|朝倉 当麻|M|16|171|
+2021|Hsu Cheng-yang|許成陽|M|16|173|
+2021|Chen Shang-hai|陳尚海|M|17|175|
+2021|Chen Mei-yu|陳梅雨|F|16|159|
+2021|Brenta|布倫塔|F|-|-|
+2021|いらは かおる|伊良波 薰|M|-|-|牛郎
+2021|なるみや みか|成宮 実日|F|-|-|黑道
+2021|あさひ かや|朝日 加悅|F|16|156|高中生
+2021|Sui Hsi|隋葈|M|18|169|高中生
+2021|Ku Yen-yu|辜言御|M|18|178|高中生
+2021|Ku Yen-cheng|辜言程|M|18|180|高中生
+2021|Elsie|埃爾西|F|16|158|高中生
+2021|ようとう|洋燈|M||174|
+2020|Recit Charny|雷西特・夏爾尼|F|14|150|國中生
+2020|にしむら はなみ|西村 花見|M|17|175|高中生
+2020|にしむら はるき|西村 春樹|M|20|178|大學生
+2020|にしむら ひなこ|西村 雛子|F|11|156|小學生
+2020|Robin|羅賓|M|17|160|高中生
+2020|はやさか かずの|早坂 和野|M|16|168|高中生
+2020|はやさか かずみ|早坂 和實|M|18|174|高中生
+2020|Clock|柯洛克|M||178|管家
+2020|さわき ゆうま|沢木 悠真|M|16|169|高中生
+2020|さわき ゆい|沢木 結衣|F|17|167|高中生
+2020|あさひ さちこ|朝日 佐千子|F|20|164|大學生
+2020|あさひ ともい|朝日 和犬|M|23|182|大學生
+2020|Hsu Mo-yang|許茉央|F|17|166|高中生
+2019|Liz|梨子|F||166|
+2019|Sancho|松竺|F|-|-|
+2019||（原表未填名）|F||156|咖啡店店員
+2018|Flora|芙蓉|F|-|-|天使
+2018|Mocha|莫卡|F|-|-|高中生
+2017|Orphée|歐菲|F|-|-|咖啡店店長
+2017|つきした りん|月下 凜|F|16|168|偶像
+2016|さくら|櫻|F|-|-|高中生`;
+const TR_RAW=`2026|つるはら がく|鶴原 樂|M|28|172|新聞工作者
+2026|わたし ばんぱいあ|綿司 萬拝亜||||
+2025||梅過||||
+2025||有稻荷 小柑|M|18|169|高中生
+2025|ゆら ふぶき|由良 吹雪|M|17|184|攝影師
+2025|Sasha・Eunice|莎夏・尤尼斯|F|?|152|大賢者
+2025|かめたに ひがし|龜谷 東|M|24|166|
+2025|ななとり るかわ|七鳥 琉川|M|21|178|大學生
+2025|あき|西|M|23|178|都市傳說課職員
+2025|Custard·Moreau|卡士達・莫羅|F|10|126|
+2025|ざいは イタチ|財破 鼬|M|23|168|無業遊民
+2025||花小路 橘里|F|17|152|高中生
+2025|みなもと くしょう|源 苦生|M|26|172|
+2025|にへい しま|二瓶 島|F|20|160|大學生
+2025|Signe・Holm|西格妮・霍姆|F|28|172|
+2025|しのはら みなと|篠原 湊|M|27|176|巡查部長
+2025|Clara·Müller|克拉拉・米勒|F|22|156|裁縫師
+2024|きいの ひふみ|紀伊野 一二三|M|27|169|登山家＆攝影師
+2024|みとおか とつき|三十日 都月|M|25|189|
+2024|そおとめ みか|早乙女 美伽|M|22|152|
+2024|まつひら ひばり|松比良 雲雀||||
+2024|しらぬい じゅうこ|不知火 十子|F|25|164|刑警（鑑識科）
+2024|いくも あきはる|生雲 明治|M|22|166|罪犯
+2024|なとり かな|名取 伽納|F|22|167|教祖
+2024|うらた かさみ|浦田 笠海|F|28|172|贗作師
+2023|まんたに にき|万谷 日記|F|19|162|大學生
+2023|かもん ねこ|嘉門 寝子|F|25|175|英語教師
+2023|しおみ わたる|潮見 涉|M|20|168|考古學者
+2023|すがはら はる|菅原 春|M|14|163|中學生
+2023|あめは しお|雨沺 塩|F|17|174|高中生
+2023|たど りま|田戸 リマ|F|23|156|大學生
+2023|たど りめ|田戸 理芽|F|20|152|大學生
+2022|なりあき さきな|成明 咲那|F|17|164|高中生
+2022|たかなし まい|小鳥遊 芽生|F|31|165|兒科助理（前刑警）`;
+const CO_RAW=`靜靜|西村 花見|にしむら はなみ|學弟|小花 時子|こばな ときこ|學姊|
+靜靜|柯洛克|Clock|管家|莉莉絲・E・奧莉維亞・所羅門|Lilith E Olivia Solomon|大小姐|
+靜靜|辜言御＆辜言程|Ku Yen-yu＆Ku Yen-cheng|哥哥|辜語曦||妹妹|骨科
+靜靜|埃爾西|Elsie|學姊|列儂・T・桑莫哈德|Lennon T Somerhalder|學弟|
+靜靜|洋燈|ようとう||小鈴鐺|||
+靜靜|紀蓮||花魁|白蛇|||
+靜靜|嘉門 有生|かもん ありお|學姊|||學妹|
+靜靜|賽爾文・西維斯頓|Selwyn Siveston||||||
+阿朕|成明 咲那|なりあき さきな||守居 已人|||
+阿朕|小鳥遊 芽生|たかなし まい|花店員工／前兒科醫生／前零課副課長|宇都宮 千哉|うつのみや ちや|花店員工／前零課刑警|
+阿朕|金咲 朗代|きんざき あきよ|金靈|欠塚 彌生|かけづか やよい|窮鬼|
+阿朕|李秀宥|이수유|學姊|千時賢|천시현|學弟|
+那那|賽諾|Cyno||克里斯|||
+那那|須賀|すが|狐妖|夕立|ゆうだち|貓又|
+那那|瓦林|Varin|酒館店主／前傭兵|波文|Bowen|前傭兵|
+那那|沃里安|Vaurien|哥哥|西爾凡・瓦勒里安|Sylvan Valerian|弟弟|骨科
+ㄈㄉ|藍道夫・摩根|Randolph Morgan|高中生|八百 潤|やお じゅん|高中生|
+ㄈㄉ|三樂坂 良|みらか りょう|高中生|貓羽 深雪|ねこは みゆき|高中生|
+ㄈㄉ|嘉門 寝子|かもん ねこ|英語教師|川浦 飛鳥|かわうら あすか|⚠️ 肥皂劇透|
+ㄈㄉ|万谷 日記|まんたに にき|妹妹|万谷 早紀||姊姊|姐妹・CB
+ㄈㄉ|二瓶 島|にへい しま|大學生|二之宮 未來|にのみや みく|大學生|
+ㄈㄉ|花小路 橘里||高中生|花咲 澄人|はなさき すみと|高中生|青梅竹馬
+ㄈㄉ|西|あき|後輩|北|きた|前輩|CB
+ㄈㄉ|七鳥 琉川|ななとり るかわ|大學生|九十九 雲彥|つくも くもひこ||
+ㄈㄉ|龜谷 東|かめたに ひがし|前音樂家|浦島 南|うらしま みなみ||CB
+ㄈㄉ|綿司 萬拝亜|わたし ばんぱいあ|吸血鬼|國信 長央|ぐにのぶ ながお|超商店員|
+普普|田戸 理芽|たど りめ|妹妹|田戸 仁季|たど にき|姊姊|骨科
+晚煙|浦田 笠海|うらた かさみ|贗畫師|波|なみ|怪盜|搭檔・CB
+晚煙|名取 伽納|なとり かな|教祖|辻川 海月|みずき|信徒|
+惠子|源 苦生|みなもと くしょう|不幸堂店主|柳 碧|りゅ あお|不幸堂來客|
+惠子|由良 吹雪|ゆら ふぶき|哥哥|由良 小雪||妹妹|兄妹・CB
+惠子|艾許・馬多克斯＆利亞姆・馬多克斯|Asher·Maddox＆Liam·Maddox|學弟|||學姊|
+小編|達魯・拉傑普特|Daru Rajput|學弟|丹德里提・迪格蒙迪|Dendritic Digment|學長|
+玲玲|朝日 和犬|あさひ ともい|學長|杏司恩||學弟|
+小艾|芙蓉|Flora||提歐|||`;
+const FAM=[
+ {f:'阿莫斯',m:[['金絲雀・阿莫斯','Canary','妹妹'],['維吉爾・阿莫斯','Virgil Amos','大哥'],['','','表弟']]},
+ {f:'紀伊野',m:[['紀伊野 一二三','きいの ひふみ','二哥'],['紀伊野 零','きいの れい','大哥'],['紀伊野 百','きいの もも','妹妹']]}
+];
+const PJ=[
+ {y:2026,it:[{m:'',n:'',c:['金千歲','達魯・拉傑普特','金絲雀']},{m:'',n:'',c:['李秀宥']}]},
+ {y:2022,it:[{m:'3月',n:'私立西城公学',c:['藍道夫・摩根','伊蓮恩・布朗','金絲雀']},{m:'4月',n:'UNLOCK!',c:['貓宮 瑠華']},{m:'5月',n:'子鳥居學園',c:['南']},{m:'11月',n:'美高',c:['金絲雀']}]},
+ {y:2021,it:[{m:'1月',n:'私立南高等学校',c:['朝日 加悅','隋葈']},{m:'2月',n:'東木超能學府',c:['朝倉 当麻']},{m:'3月',n:'孝信高中',c:['許成陽','陳尚海','陳梅雨']},{m:'4月',n:'魔院',c:['辜言御','辜言程']},{m:'6月',n:'北木超能學府',c:['嘉門 穀里','嘉門 (NPC)','小野瀨 橆実']},{m:'12月',n:'DTD',c:['伊良波 薰','成宮 実日']}]},
+ {y:2020,it:[{m:'1月',n:'蓮英超能學院',c:['雷西特・夏爾尼','西村 花見','西村 春樹 (NPC)','西村 雛子 (NPC)']},{m:'5月',n:'薪御能',c:['和野']},{m:'7月',n:'Energy實驗學校',c:['羅賓','西村 花見']},{m:'7月',n:'永明高中',c:['許茉央']},{m:'8月',n:'南木超能學府',c:['早坂 和野','早坂 和實']},{m:'9月',n:'超能大學',c:['朝日 佐千子','朝日 和犬','羅賓']}]},
+ {y:2016,it:[{m:'1月',n:'園螢高中',c:['櫻']}]}
+];
+
+
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s??'').replace(/\(NPC\)/g,'').replace(/[\s・·•＆&()（）]/g,'');
+const $=id=>document.getElementById(id);
+
+/* ---------- seed (原始名單，用於第一次匯入與離線預覽) ---------- */
+const seedChars=()=>{let o=0;const p=(raw,t)=>raw.trim().split('\n').map(l=>{const [y,r,n,s,a,h,j]=l.split('|');return{type:t,year:+y,reading:r,name:n,sex:s,age:a,height:h,job:j,avatar:'',order:o++}});return [...p(OC_RAW,'oc'),...p(TR_RAW,'trpg')]};
+const seedCo=()=>CO_RAW.trim().split('\n').map((l,i)=>{const [partner,a,ar,arl,b,br,brl,tag]=l.split('|');return{partner,a,ar,arl,b,br,brl,tag:tag||'',order:i}});
+const seedFam=()=>FAM.map((f,i)=>({name:f.f,members:f.m.map(m=>m.join('｜')).join('\n'),order:i}));
+const seedPj=()=>{let o=0;return PJ.flatMap(g=>g.it.map(i=>({year:g.y,month:i.m,name:i.n,cast:i.c.join('、'),order:o++})))};
+
+
+/* ---------- admin state ---------- */
+const COLS={chars:'characters',co:'co',pj:'projects',fam:'family'};
+const S={chars:[],co:[],fam:[],pj:[]};
+let user=null,api=null,online=false,loaded=new Set();
+const isOwner=()=>!!(user&&OWNER_EMAIL&&user.email===OWNER_EMAIL);
+const bg=u=>u?` style="background-image:url('${u}')"`:'';
+const stat=c=>`${c.sex||'-'} / ${!c.age?'-':c.age==='-'||c.age==='?'?c.age:c.age+'y'} / ${!c.height||c.height==='-'?'-':c.height} cm`;
+
+/* ---------- schema ---------- */
+const SCHEMA={
+ chars:[{k:'type',l:'類別',t:'select',o:[['oc','ᴏᴄ 原創角色'],['trpg','ᴛʀᴘɢ 角卡']]},{k:'year',l:'年份',t:'number',req:1},{k:'name',l:'名字',req:1},{k:'reading',l:'讀音／原文名',ph:'きんざき あきよ、Daru Rajput'},{k:'sex',l:'性別',t:'select',o:[['F','F'],['M','M'],['','未填']]},{k:'age',l:'年齡',ph:'數字，或 ? / -'},{k:'height',l:'身高 cm',ph:'數字，或 -'},{k:'job',l:'身分'},{k:'avatar',l:'頭貼',t:'image'}],
+ co:[{k:'partner',l:'合作夥伴',list:'dlPartner',req:1},{k:'tag',l:'標籤',ph:'骨科、CB、青梅竹馬'},{k:'a',l:'自家角色',list:'dlChars',ph:'兩位以上用 ＆ 分隔'},{k:'b',l:'對方角色'},{k:'ar',l:'自家讀音'},{k:'br',l:'對方讀音'},{k:'arl',l:'自家身分／關係'},{k:'brl',l:'對方身分／關係'}],
+ fam:[{k:'name',l:'家族名',req:1},{k:'members',l:'成員',t:'textarea',ph:'一行一位：名字｜讀音｜稱謂\n紀伊野 零｜きいの れい｜大哥'}],
+ pj:[{k:'year',l:'年份',t:'number',req:1},{k:'month',l:'月份',ph:'3月'},{k:'name',l:'企劃名稱',wide:1},{k:'cast',l:'參加角色',t:'textarea',ph:'用「、」分隔，NPC 寫成「名字 (NPC)」'}]
+};
+const TITLE={chars:'角色',co:'配對',fam:'家族',pj:'企劃'};
+const BLANK={chars:()=>({type:'oc',year:new Date().getFullYear(),sex:'F'}),co:()=>({}),fam:()=>({}),pj:()=>({year:new Date().getFullYear()})};
+const TABS=[['chars','角色'],['co','配對'],['fam','家族'],['pj','企劃'],['import','匯入']];
+let tab='chars',editing={chars:null,co:null,fam:null,pj:null},img='',filt={type:'all',q:''};
+
+/* ---------- rendering ---------- */
+const field=(f,v)=>{const id='f_'+f.k,lab=`<label for="${id}">${f.l}${f.req?' *':''}</label>`,w=f.t==='textarea'||f.t==='image'||f.wide?' wide':'';
+ if(f.t==='select')return `<div class="fld">${lab}<select id="${id}" name="${f.k}">${f.o.map(([k,t])=>`<option value="${k}"${String(v??'')===k?' selected':''}>${t}</option>`).join('')}</select></div>`;
+ if(f.t==='textarea')return `<div class="fld${w}">${lab}<textarea id="${id}" name="${f.k}" rows="5" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea></div>`;
+ if(f.t==='image'){img=v||'';return `<div class="fld wide"><span class="lbl">${f.l}</span><div class="imgrow"><span class="pv" id="pv"${bg(img)}>${img?'':'未放'}</span><label class="btn ghost filebtn">選擇圖片<input type="file" accept="image/*" id="imgIn" hidden></label><button type="button" class="btn ghost" id="imgClr">移除</button></div></div>`}
+ return `<div class="fld${w}">${lab}<input id="${id}" name="${f.k}" ${f.t==='number'?'type="number" inputmode="numeric"':'type="text"'} value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.list?`list="${f.list}"`:''} ${f.req?'required':''} autocomplete="off"></div>`};
+const formHTML=col=>{const id=editing[col],d=id?S[col].find(x=>x.id===id):BLANK[col]();
+ return `<form class="frm" id="frm" data-col="${col}"><div class="fhead"><h2>${id?`編輯${TITLE[col]}：${esc(d.name||d.a||'')}`:`新增${TITLE[col]}`}</h2>${id?'<button type="button" class="lnk" id="cancelEdit">取消編輯</button>':''}</div>
+ ${SCHEMA[col].map(f=>field(f,d[f.k])).join('')}
+ <div class="fld wide acts"><button class="btn" type="submit">${id?'儲存':'新增'}</button>${id?`<button class="btn ghost danger" type="button" id="delBtn">刪除</button>`:''}<span class="msg" role="status"></span></div></form>`};
+
+const sortCol={chars:L=>[...L].sort((a,b)=>b.year-a.year||a.order-b.order),co:L=>[...L].sort((a,b)=>a.order-b.order),fam:L=>[...L].sort((a,b)=>a.order-b.order),pj:L=>[...L].sort((a,b)=>b.year-a.year||(parseInt(b.month)||0)-(parseInt(a.month)||0)||b.order-a.order)};
+const rowHTML={
+ chars:c=>`<span class="th"${bg(c.avatar)}></span><span class="main"><b>${esc(c.name)}</b><i>${esc(c.reading)}</i></span><span class="meta">${c.type==='trpg'?'ᴛʀᴘɢ':'ᴏᴄ'} ${c.year}<br>${esc(stat(c))}</span>`,
+ co:x=>`<span class="main"><b>${esc(x.a||'—')} ✶ ${esc(x.b||'—')}</b><i>${esc(x.partner)}${x.tag?'　'+esc(x.tag):''}</i></span>`,
+ fam:f=>`<span class="main"><b>${esc(f.name)}</b><i>${esc(String(f.members||'').split('\n').map(l=>l.split('｜')[0]).filter(Boolean).join('、'))}</i></span>`,
+ pj:p=>`<span class="main"><b>${esc(p.name||'企劃名未填')}</b><i>${esc(p.cast)}</i></span><span class="meta">${p.year} ${esc(p.month)}</span>`
+};
+const listHTML=col=>{let L=sortCol[col](S[col]);
+ if(col==='chars'){L=L.filter(c=>(filt.type==='all'||c.type===filt.type)&&(!filt.q||[c.name,c.reading,c.job].join(' ').toLowerCase().includes(filt.q.toLowerCase())))}
+ const tools=col==='chars'?`<div class="ltools"><select id="ft" aria-label="類別">${[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']].map(([k,t])=>`<option value="${k}"${filt.type===k?' selected':''}>${t}</option>`).join('')}</select><input id="fq" type="search" placeholder="搜尋名字" value="${esc(filt.q)}" aria-label="搜尋名字"></div>`:'';
+ return `<div class="lhead"><h2>已建立的${TITLE[col]}</h2><span class="cnt">${L.length} 筆</span></div>${tools}<ul class="list">${L.map(x=>`<li><button class="item${editing[col]===x.id?' sel':''}" data-pick="${x.id}">${rowHTML[col](x)}</button></li>`).join('')||'<li class="none">還沒有資料。</li>'}</ul>`};
+
+const importHTML=()=>{const seeds={chars:seedChars(),co:seedCo(),fam:seedFam(),pj:seedPj()};
+ return `<div class="imp"><h2>匯入原始名單</h2><p>把試算表裡的角色、配對、家族和企劃一次匯入資料庫。只會匯入目前還是空的類別，已經有資料的類別會跳過，不會重複。</p>
+ <table><thead><tr><th>類別</th><th>資料庫現有</th><th>原始名單</th><th>狀態</th></tr></thead><tbody>${Object.keys(TITLE).map(k=>`<tr><td>${TITLE[k]}</td><td>${S[k].length}</td><td>${seeds[k].length}</td><td>${S[k].length?'已有資料，略過':'會匯入'}</td></tr>`).join('')}</tbody></table>
+ <button class="btn" id="seedBtn" ${Object.keys(TITLE).every(k=>S[k].length)?'disabled':''}>匯入</button> <span class="msg" id="seedMsg" role="status"></span></div>`};
+
+const datalists=()=>`<datalist id="dlChars">${S.chars.map(c=>`<option value="${esc(c.name)}">`).join('')}</datalist><datalist id="dlPartner">${[...new Set(S.co.map(x=>x.partner))].map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`;
+
+function renderShell(){
+ const app=$('app'),who=$('who');
+ if(!online){app.innerHTML=`<div class="center"><h2>還沒有連線設定</h2><p>請在同一個資料夾的 config.js 填入 Firebase 設定和房主信箱。</p></div>`;who.innerHTML='';return}
+ if(!user){who.innerHTML='';app.innerHTML=`<div class="center"><h2>後台登入</h2><p>只有房主帳號可以編輯資料。</p><button class="btn" id="loginBtn">用 Google 登入</button><span class="msg" id="loginMsg"></span></div>`;return}
+ who.innerHTML=`<span>${esc(user.email)}</span><button class="lnk" id="logoutBtn">登出</button>`;
+ if(!isOwner()){app.innerHTML=`<div class="center"><h2>這個帳號沒有編輯權限</h2><p>請改用房主帳號登入。</p></div>`;return}
+ app.innerHTML=`<nav class="tabs" role="tablist">${TABS.map(([k,t])=>`<button role="tab" data-tab="${k}" aria-selected="${tab===k}">${t}</button>`).join('')}</nav><div id="pane"></div>`;
+ renderPane(true);
+}
+function renderPane(full){
+ const pane=$('pane');if(!pane)return;
+ document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+ if(tab==='import'){pane.innerHTML=importHTML();return}
+ if(full||!$('frm')||$('frm').dataset.col!==tab)pane.innerHTML=`<div class="cols"><section class="fcol">${formHTML(tab)}</section><section class="lcol" id="lcol">${listHTML(tab)}</section></div>${datalists()}`;
+ else{$('lcol').innerHTML=listHTML(tab)}
+}
+let toastT;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200)}
+
+/* ---------- writes ---------- */
+const readForm=fm=>{const o={};SCHEMA[fm.dataset.col].forEach(f=>{if(f.t==='image')o[f.k]=img;else{const el=fm.elements[f.k];o[f.k]=f.t==='number'?(+el.value||0):el.value.trim()}});return o};
+const resizeImg=file=>new Promise((res,rej)=>{const im=new Image(),url=URL.createObjectURL(file);im.onload=()=>{const Z=320,cv=document.createElement('canvas');cv.width=cv.height=Z;const k=Math.max(Z/im.width,Z/im.height),w=im.width*k,h=im.height*k,g=cv.getContext('2d');g.fillStyle='#fafafa';g.fillRect(0,0,Z,Z);g.drawImage(im,(Z-w)/2,(Z-h)/2,w,h);URL.revokeObjectURL(url);res(cv.toDataURL('image/jpeg',.85))};im.onerror=()=>rej(new Error('讀不到這張圖片'));im.src=url});
+async function save(col,id,data){
+ if(id)await api.setDoc(api.doc(api.db,P+COLS[col],id),data,{merge:true});
+ else{data.order=Date.now();data.createdAt=api.serverTimestamp();await api.addDoc(api.collection(api.db,P+COLS[col]),data)}
+}
+async function importSeed(){
+ const seeds={chars:seedChars(),co:seedCo(),fam:seedFam(),pj:seedPj()};let batch=api.writeBatch(api.db),n=0;
+ for(const k of Object.keys(TITLE)){if(S[k].length)continue;for(const r of seeds[k]){batch.set(api.doc(api.collection(api.db,P+COLS[k])),r);if(++n%400===0){await batch.commit();batch=api.writeBatch(api.db)}}}
+ await batch.commit();return n;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{
+ const t=e.target;
+ if(t.closest('#loginBtn')){try{await api.signInWithPopup(api.auth,new api.GoogleAuthProvider())}catch(err){if(err.code!=='auth/popup-closed-by-user')$('loginMsg').textContent='登入失敗：'+(err.code||err.message)}return}
+ if(t.closest('#logoutBtn')){await api.signOut(api.auth);return}
+ const tb=t.closest('[data-tab]');if(tb){tab=tb.dataset.tab;renderPane(true);return}
+ const pk=t.closest('[data-pick]');if(pk){editing[tab]=pk.dataset.pick;renderPane(true);document.querySelector('.fcol').scrollIntoView({block:'start',behavior:'smooth'});return}
+ if(t.id==='cancelEdit'){editing[tab]=null;renderPane(true);return}
+ if(t.id==='imgClr'){img='';const pv=$('pv');pv.style.backgroundImage='';pv.textContent='未放';return}
+ if(t.id==='delBtn'){if(t.dataset.armed!=='1'){t.dataset.armed='1';t.textContent='再按一次確認刪除';return}
+  try{await api.deleteDoc(api.doc(api.db,P+COLS[tab],editing[tab]));editing[tab]=null;renderPane(true);toast('已刪除')}catch(err){toast('刪除失敗：'+err.message)}return}
+ if(t.id==='seedBtn'){t.disabled=true;$('seedMsg').textContent='匯入中…';try{const n=await importSeed();toast(`已匯入 ${n} 筆`)}catch(err){$('seedMsg').textContent='匯入失敗：'+err.message;t.disabled=false}return}
+});
+document.addEventListener('change',async e=>{
+ if(e.target.id==='imgIn'&&e.target.files[0]){try{img=await resizeImg(e.target.files[0]);const pv=$('pv');pv.style.backgroundImage=`url('${img}')`;pv.textContent=''}catch(err){toast(err.message)}}
+ if(e.target.id==='ft'){filt.type=e.target.value;$('lcol').innerHTML=listHTML(tab)}
+});
+document.addEventListener('input',e=>{if(e.target.id==='fq'){filt.q=e.target.value;$('lcol').innerHTML=listHTML(tab);const q=$('fq');q.focus();q.setSelectionRange(q.value.length,q.value.length)}});
+document.addEventListener('submit',async e=>{
+ const fm=e.target.closest('#frm');if(!fm)return;e.preventDefault();
+ const col=fm.dataset.col,id=editing[col],data=readForm(fm),btn=fm.querySelector('[type=submit]'),msg=fm.querySelector('.msg');
+ btn.disabled=true;msg.textContent='儲存中…';
+ try{await save(col,id,data);toast(id?'已儲存':`已新增「${data.name||data.a||''}」`);
+  if(id){editing[col]=null;renderPane(true)}
+  else{const keep=col==='chars'?{type:data.type,year:data.year}:col==='pj'?{year:data.year}:col==='co'?{partner:data.partner}:{};const b=BLANK[col];BLANK[col]=()=>({...b(),...keep});renderPane(true);BLANK[col]=b;fm.ownerDocument.querySelector('#frm input[name="name"],#frm input[name="a"]')?.focus()}
+ }catch(err){msg.textContent='儲存失敗：'+err.message;btn.disabled=false}
+});
+
+/* ---------- boot ---------- */
+async function boot(){
+ if(!FIREBASE_CONFIG.apiKey){renderShell();return}
+ const base='https://www.gstatic.com/firebasejs/10.12.2/';
+ const [A,AU,FS]=await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
+ const app=A.initializeApp(FIREBASE_CONFIG),auth=AU.getAuth(app),db=FS.getFirestore(app);
+ api={auth,db,GoogleAuthProvider:AU.GoogleAuthProvider,signInWithPopup:AU.signInWithPopup,signOut:AU.signOut,collection:FS.collection,doc:FS.doc,addDoc:FS.addDoc,setDoc:FS.setDoc,deleteDoc:FS.deleteDoc,writeBatch:FS.writeBatch,serverTimestamp:FS.serverTimestamp};
+ online=true;
+ let unsub=[];
+ AU.onAuthStateChanged(auth,u=>{user=u;unsub.forEach(f=>f());unsub=[];renderShell();
+  if(!isOwner())return;
+  for(const [k,col] of Object.entries(COLS))unsub.push(FS.onSnapshot(FS.collection(db,P+col),snap=>{S[k]=snap.docs.map(d=>({id:d.id,...d.data()}));loaded.add(k);if(editing[k]&&!S[k].some(x=>x.id===editing[k]))editing[k]=null;renderPane(false)},err=>toast('讀取失敗：'+err.message)));
+ });
+ renderShell();
+}
+boot().catch(err=>{$('app').innerHTML=`<div class="center"><h2>後台啟動失敗</h2><p>${esc(err.message)}</p></div>`});
+
+</script>
+</body>
+</html>
