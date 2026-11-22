@@ -300,7 +300,7 @@ const rowHTML={
 const listHTML=col=>{let L=sortCol[col](S[col]);
  if(col==='chars'){L=L.filter(c=>(filt.type==='all'||c.type===filt.type)&&(!filt.q||[c.name,c.reading,c.job].join(' ').toLowerCase().includes(filt.q.toLowerCase())))}
  const tools=col==='chars'?`<div class="ltools"><select id="ft" aria-label="類別">${[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']].map(([k,t])=>`<option value="${k}"${filt.type===k?' selected':''}>${t}</option>`).join('')}</select><input id="fq" type="search" placeholder="搜尋名字" value="${esc(filt.q)}" aria-label="搜尋名字"></div>`:'';
- return `<div class="lhead"><h2>已建立的${TITLE[col]}</h2><span class="cnt">${L.length} 筆</span></div>${tools}<ul class="list">${L.map(x=>`<li><button class="item${editing[col]===x.id?' sel':''}" data-pick="${x.id}">${rowHTML[col](x)}</button></li>`).join('')||'<li class="none">還沒有資料。</li>'}</ul>`};
+ return `<div class="lhead"><h2>已建立的${TITLE[col]}</h2><span class="cnt">${L.length} 筆</span></div>${tools}<ul class="list" data-col="${col}">${L.map(x=>`<li><button class="item${editing[col]===x.id?' sel':''}" data-pick="${x.id}">${rowHTML[col](x)}</button></li>`).join('')||'<li class="none">還沒有資料。</li>'}</ul>`};
 
 const importHTML=()=>{const seeds={chars:seedChars(),co:seedCo(),fam:seedFam(),pj:seedPj()};
  return `<div class="imp"><h2>匯入原始名單</h2><p>把試算表裡的角色、配對、家族和企劃一次匯入資料庫。只會匯入目前還是空的類別，已經有資料的類別會跳過，不會重複。</p>
@@ -320,6 +320,12 @@ function renderShell(){
 }
 function renderPane(full){
  const pane=$('pane');if(!pane)return;
+ const lst=document.querySelector('.list'),st=lst&&lst.dataset.col===tab?lst.scrollTop:0;
+ renderPaneInner(full);
+ const nl=document.querySelector('.list');if(nl&&st)nl.scrollTop=st;
+}
+function renderPaneInner(full){
+ const pane=$('pane');
  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
  if(tab==='import'){pane.innerHTML=importHTML();return}
  if(full||!$('frm')||$('frm').dataset.col!==tab)pane.innerHTML=`<div class="cols"><section class="fcol">${formHTML(tab)}</section><section class="lcol" id="lcol">${listHTML(tab)}</section></div>${datalists()}`;
@@ -379,8 +385,11 @@ document.addEventListener('click',async e=>{
  if(t.closest('#loginBtn')){try{await api.signInWithPopup(api.auth,new api.GoogleAuthProvider())}catch(err){if(err.code!=='auth/popup-closed-by-user')$('loginMsg').textContent='登入失敗：'+(err.code||err.message)}return}
  if(t.closest('#logoutBtn')){await api.signOut(api.auth);return}
  const tb=t.closest('[data-tab]');if(tb){tab=tb.dataset.tab;renderPane(true);return}
- const pk=t.closest('[data-pick]');if(pk){editing[tab]=pk.dataset.pick;renderPane(true);document.querySelector('.fcol').scrollIntoView({block:'start',behavior:'smooth'});return}
- if(t.id==='cancelEdit'){editing[tab]=null;renderPane(true);return}
+ const pk=t.closest('[data-pick]');if(pk){editing[tab]=pk.dataset.pick;
+  document.querySelector('.fcol').innerHTML=formHTML(tab);
+  document.querySelectorAll('.item.sel').forEach(x=>x.classList.remove('sel'));pk.classList.add('sel');
+  if(matchMedia('(max-width:820px)').matches)document.querySelector('.fcol').scrollIntoView({block:'start',behavior:'smooth'});return}
+ if(t.id==='cancelEdit'){editing[tab]=null;document.querySelector('.fcol').innerHTML=formHTML(tab);document.querySelectorAll('.item.sel').forEach(x=>x.classList.remove('sel'));return}
  if(t.id==='imgDl'){if(!img){toast('還沒有頭貼可以下載');return}const n=($('f_name')?.value||'').trim()||'頭貼',a=document.createElement('a');a.href=img;a.download=n.replace(/[\\/:*?"<>|]/g,'_')+'.jpg';document.body.appendChild(a);a.click();a.remove();return}
  if(t.id==='imgClr'){img='';const pv=$('pv');pv.style.backgroundImage='';pv.textContent='未放';return}
  if(t.id==='delBtn'){if(t.dataset.armed!=='1'){t.dataset.armed='1';t.textContent='再按一次確認刪除';return}
@@ -388,7 +397,8 @@ document.addEventListener('click',async e=>{
  if(t.id==='seedBtn'){t.disabled=true;$('seedMsg').textContent='匯入中…';try{const n=await importSeed();toast(`已匯入 ${n} 筆`)}catch(err){$('seedMsg').textContent='匯入失敗：'+err.message;t.disabled=false}return}
 });
 document.addEventListener('change',async e=>{
- if(e.target.id==='imgIn'&&e.target.files[0]){const f=e.target.files[0];e.target.value='';try{const u=await cropImage(f);if(u){img=u;const pv=$('pv');pv.style.backgroundImage=`url('${img}')`;pv.textContent=''}}catch(err){toast(err.message)}}
+ if(e.target.id==='imgIn'&&e.target.files[0]){const f=e.target.files[0];e.target.value='';try{const u=await cropImage(f);if(u){img=u;const pv=$('pv');pv.style.backgroundImage=`url('${img}')`;pv.textContent='';
+   const id=editing.chars;if(tab==='chars'&&id){try{await api.setDoc(api.doc(api.db,P+COLS.chars,id),{avatar:u},{merge:true});toast('頭貼已更新')}catch(err){toast('頭貼更新失敗：'+err.message)}}}}catch(err){toast(err.message)}}
  if(e.target.id==='ft'){filt.type=e.target.value;$('lcol').innerHTML=listHTML(tab)}
 });
 document.addEventListener('input',e=>{if(e.target.id==='fq'){filt.q=e.target.value;$('lcol').innerHTML=listHTML(tab);const q=$('fq');q.focus();q.setSelectionRange(q.value.length,q.value.length)}});
