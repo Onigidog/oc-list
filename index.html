@@ -95,6 +95,58 @@ h3.sub{font-weight:700;font-size:18px;margin:40px 0 0;text-align:center}
 .vt .dt{font-size:16px;color:#444;line-height:1.5}.vt .dt small{font-size:13px;color:var(--mute)}
 .vt h4{margin:0;font-size:17px;font-weight:700;line-height:1.5}
 .vt p{margin:2px 0 0;font-size:14px;color:#666}
+.pjt{max-width:1000px;margin:6px auto 0}
+.pjy{display:grid;grid-template-columns:96px minmax(0,1fr);gap:0 36px;padding:6px 0 18px}
+.pjy h2{margin:0;align-self:start;background:#d9d9d9;color:#fafafa;font-size:19px;font-weight:700;letter-spacing:.14em;text-align:center;line-height:1;padding:5px 0}
+.pjg{display:flex;flex-wrap:wrap;gap:22px 40px}
+.pjc{margin:0;display:flex;flex-direction:column;align-items:center}
+.faces{display:flex}
+.face{all:unset;box-sizing:border-box;width:90px;height:90px;background:#ececec center/cover no-repeat;cursor:pointer;display:grid;place-items:center;align-content:center;font-size:11px;color:#999;text-align:center;line-height:1.3;padding:4px}
+.face.blank{border:1px solid #e2e2e2}.face+.face.blank{border-left:0}
+span.face{cursor:default}.face small{display:block;font-size:9px;color:#bbb}
+.face:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+button.face:hover{filter:brightness(1.06)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.pjc figcaption{margin-top:8px;font-size:12px;font-weight:700;color:#aaa;letter-spacing:.18em;text-align:center;line-height:1.4}
+.pjc figcaption small{display:block;font-size:10px;font-weight:400;letter-spacing:.1em;color:#bbb}
+@media(max-width:600px){.pjy{grid-template-columns:minmax(0,1fr);gap:12px}.pjy h2{justify-self:start;padding:5px 12px}.pjg{gap:18px 22px}.face{width:64px;height:64px;font-size:10px}}
+.sh{margin:6px 0 34px}
+.shh{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:10px 18px;background:#d9d9d9;padding:5px 8px;margin-bottom:12px}
+.shh h2{margin:0;color:#fafafa;font-size:14px;font-weight:700;letter-spacing:.12em}
+.shf{display:flex;gap:8px;flex-wrap:wrap}
+.seg.sm{border:0;background:none;gap:2px}.seg.sm button{background:#fafafa;border:0;min-height:30px;padding:0 10px;font-size:12px}.seg.sm button+button{border:0}
+.seg.sm button[aria-pressed=true]{background:#555;color:#fafafa}
+.shnote{font-size:13px;color:var(--mute);margin:0 0 10px}
+.hr{list-style:none;margin:0;padding:0;columns:2 420px;column-gap:40px}
+.hr li{break-inside:avoid;display:grid;grid-template-columns:2.2em minmax(0,11em) minmax(0,1fr) 4.6em;align-items:center;gap:10px;padding:4px 0;border-bottom:1px solid var(--line)}
+.rk{font-size:13px;font-weight:700;color:#aaa;text-align:right}
+.hrn{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;min-width:0}
+.hrn:focus-visible{outline:2px solid var(--ink)}
+.hrn .mini{width:30px;height:30px;margin:0;flex:none}
+.nm2{display:flex;flex-direction:column;min-width:0}.nm2 b{font-size:14px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm2 i{font-style:normal;font-size:11px;color:var(--mute)}
+.bar{height:8px;background:#efefef}.bar span{display:block;height:100%;background:#aaa55a}
+.cm{font-size:14px;font-weight:700;text-align:right;white-space:nowrap}.cm small{font-weight:400;color:var(--mute);font-size:11px}
+.sh2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 40px}
+.ratio{display:flex;height:34px;font-size:13px;font-weight:700;color:#fafafa}
+.ratio span{display:flex;align-items:center;padding:0 10px;white-space:nowrap;min-width:max-content}
+.rf{background:#aaa55a}.rm{background:#555}.ru{background:#cfcfcf;color:#555}
+.lg{font-size:12px;color:#fafafa;display:flex;align-items:center;gap:5px}.lg i{display:inline-block;width:10px;height:10px}
+.k1{background:#555}.k2{background:#aaa55a}
+.yrs{list-style:none;margin:0;padding:0}
+.yrs li{display:grid;grid-template-columns:3.2em minmax(0,1fr) 2em;align-items:center;gap:10px;padding:3px 0}
+.yrs .y{font-size:13px;color:#666}.yrs .n{font-size:13px;font-weight:700;text-align:right}
+.st{display:flex;height:12px;background:#f1f1f1}.st span{display:block;height:100%}
+@media(max-width:600px){.hr li{grid-template-columns:1.8em minmax(0,1fr) 4.4em}.hr .bar{grid-column:2/4;grid-row:2;margin-left:38px}}
+@media(min-width:900px){main.band{padding-right:max(48px,calc(clamp(14px,4vw,56px) + 80px))}}
+.hchart{display:flex;flex-direction:column;gap:clamp(8px,1.4vw,14px)}
+.hrow{display:grid;grid-template-columns:clamp(18px,2.2vw,26px) minmax(0,1fr) 2em;gap:clamp(10px,2vw,22px);align-items:start}
+.hsw{display:block;aspect-ratio:1;border:1px solid #e6e6e6}
+.hcells{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(4px,1vw,12px)}
+.hc{all:unset;box-sizing:border-box;aspect-ratio:1;background:#f3f3f3 center/cover no-repeat;display:grid;place-items:center;font-size:10px;color:#999;text-align:center;line-height:1.2;padding:2px;overflow:hidden;cursor:pointer}
+.hc.blank{border:1px solid #e2e2e2}.hc.empty{cursor:default;background:#f6f6f6}
+.hc:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.hn{font-size:12px;color:#aaa;font-weight:700;padding-top:2px}
+@container (max-width:620px){.hcells{grid-template-columns:repeat(6,minmax(0,1fr))}}
 .npc{font-size:12px;color:var(--mute)}
 
 #ov{position:fixed;inset:0;background:rgb(250 250 250/.85);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
@@ -163,7 +215,7 @@ main.band{position:relative}
 </svg></button>
 <div id="ovw" role="dialog" aria-label="本頁角色總覽"></div>
 <div class="shell"><nav aria-label="分頁"><div class="wrap" id="tabs">
-<a href="#oc">ᴏᴄ</a><a href="#trpg">ᴛʀᴘɢ</a><a href="#co">ᴄᴏ</a><a href="#project">ᴘʀᴏᴊᴇᴄᴛ</a></div></nav>
+<a href="#oc">ᴏᴄ</a><a href="#trpg">ᴛʀᴘɢ</a><a href="#co">ᴄᴏ</a><a href="#project">ᴘʀᴏᴊᴇᴄᴛ</a><a href="#sheet">𝗦𝗛𝗘𝗘𝗧</a></div></nav>
 <main class="band"><div class="wrap"><div id="view"></div></div></main></div>
 <div id="ov" role="dialog" aria-modal="true" aria-labelledby="dn"><div id="dlg"></div></div>
 <script type="module">
@@ -212,15 +264,47 @@ const coView=()=>{const list=coSorted(),ps=[...new Set(list.map(x=>x.partner))],
  return ps.map(p=>`<section class="co"><h2>${esc(p)||'未分組'}</h2><div class="pairs">${list.filter(x=>x.partner===p).map(x=>`<div class="pair">${who(x.a,x.ar,x.arl)}<span class="x" aria-hidden="true">✶</span>${who(x.b,x.br,x.brl)}${x.tag?`<div class="tg">${esc(x.tag)}</div>`:''}</div>`).join('')}</div></section>`).join('')+
  (fam.length?`<h3 class="sub">家族</h3>`+fam.map(f=>`<section class="co"><h2>${esc(f.name)}</h2><div class="pairs">${famMembers(f).map(m=>`<div class="pair" style="grid-template-columns:minmax(0,1fr)">${who(m[0],m[1],m[2])}</div>`).join('')}</div></section>`).join(''):'');
 };
-const pjView=()=>S.pj.length?`<ol class="vt">${pjSorted().map(i=>`<li><span class="dt">${i.year}${i.month?`<br><small>${esc(i.month)}</small>`:''}</span><div><h4>${esc(i.name||'企劃名未填')}</h4><p>${castList(i).map(s=>{const npc=/NPC/.test(s),nm=s.replace(/\s*\(NPC\)/,''),c=npc?null:findChar(nm);return (c?`<button class="link" data-id="${c.id}">${esc(nm)}</button>`:esc(nm))+(npc?'（NPC）':'')}).join('、')}</p></div></li>`).join('')}</ol>`:`<p class="empty">還沒有企劃資料。</p>`;
+const pjFace=s=>{const npc=/NPC/.test(s),n=s.replace(/\s*\(NPC\)/,''),c=npc?null:findChar(n);
+ return c?`<button class="face${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}"${bg(c.avatar)}>${c.avatar?`<span class="sr">${esc(c.name)}</span>`:esc(c.name)}</button>`:`<span class="face blank" title="${esc(n)}${npc?'（NPC）':''}">${esc(n)}${npc?'<small>NPC</small>':''}</span>`};
+const pjView=()=>{if(!S.pj.length)return `<p class="empty">還沒有企劃資料。</p>`;const L=pjSorted(),ys=[...new Set(L.map(p=>p.year))];
+ return `<div class="pjt">${ys.map(y=>`<section class="pjy"><h2>${y}</h2><div class="pjg">${L.filter(p=>p.year===y).map(p=>`<figure class="pjc"><div class="faces">${castList(p).map(pjFace).join('')}</div><figcaption>${p.month?`<small>${esc(p.month)}</small>`:''}${esc(p.name||'企劃名未填')}</figcaption></figure>`).join('')}</div></section>`).join('')}</div>`};
 const gate=()=>`<div class="gate"><p style="font-size:18px">⚠️ TRPG 角卡可能會劇透</p><p>角卡裡的身分與經歷可能洩漏模組內容。確定要看再打開。</p><button class="btn" id="openTr">顯示 TRPG 角卡</button></div>`;
 
-const LABEL={oc:'ᴏᴄ',trpg:'ᴛʀᴘɢ',co:'ᴄᴏ',project:'ᴘʀᴏᴊᴇᴄᴛ'};
+
+/* ---------- sheet ---------- */
+let hf={type:'all',sex:'all'};
+const hNum=c=>{const v=parseFloat(c.height);return isFinite(v)&&v>0?v:null};
+const seg=(key,cur,opts)=>`<div class="seg sm" role="group">${opts.map(([k,t])=>`<button data-hf="${key}:${k}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`;
+const heightRank=()=>{const L=S.chars.filter(c=>hNum(c)!==null&&(hf.type==='all'||c.type===hf.type)&&(hf.sex==='all'||c.sex===hf.sex)).sort((a,b)=>hNum(b)-hNum(a)||a.name.localeCompare(b.name));
+ if(!L.length)return '<p class="empty">沒有符合條件、有填身高的角色。</p>';
+ const max=hNum(L[0]),min=Math.min(...L.map(hNum)),lo=Math.max(0,Math.floor((min-10)/10)*10);let rank=0,prev=null;
+ return `<ol class="hr">${L.map((c,i)=>{const h=hNum(c);if(h!==prev){rank=i+1;prev=h}return `<li><span class="rk">${rank}</span><button class="hrn" data-id="${c.id}"><span class="mini"${bg(c.avatar)}></span><span class="nm2"><b>${esc(c.name)}</b><i>${c.type==='trpg'?'✱':'✶'} ${c.sex||'-'}${c.age&&c.age!=='-'?' / '+esc(c.age)+(c.age==='?'?'':'y'):''}</i></span></button><span class="bar"><span style="width:${((h-lo)/(max-lo)*100).toFixed(1)}%"></span></span><span class="cm">${h}<small> cm</small></span></li>`}).join('')}</ol>`};
+
+const HAIR=[['red','紅・粉','#e3a3a3'],['orange','橘・棕','#e4cba1'],['yellow','黃・金','#e5e3a3'],['green','綠','#a8dcb0'],['blue','藍','#a3a5e3'],['purple','紫','#d0a3e3'],['black','黑・灰','#888888'],['white','白・銀','#fafafa']];
+let hairT='all';
+const hairChart=()=>{const L=S.chars.filter(c=>c.hair&&(hairT==='all'||c.type===hairT)).sort((a,b)=>b.year-a.year||a.order-b.order);
+ const unset=S.chars.filter(c=>!c.hair&&(hairT==='all'||c.type===hairT)).length;
+ const rows=HAIR.map(h=>{const M=L.filter(c=>c.hair===h[0]),fill=Math.max(12,Math.ceil(M.length/12)*12)-M.length;
+  return `<div class="hrow"><span class="hsw" style="background:${h[2]}" title="${h[1]}"><span class="sr">${h[1]}</span></span><div class="hcells">${M.map(c=>`<button class="hc${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}"${bg(c.avatar)}>${c.avatar?`<span class="sr">${esc(c.name)}</span>`:esc(c.name)}</button>`).join('')}${'<span class="hc empty"></span>'.repeat(fill)}</div><span class="hn">${M.length}</span></div>`}).join('');
+ return `<section class="sh"><div class="shh"><h2>髮色排行榜</h2><div class="shf"><div class="seg sm" role="group">${[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']].map(([k,t])=>`<button data-hairt="${k}" aria-pressed="${hairT===k}">${t}</button>`).join('')}</div></div></div>${L.length?'':'<p class="shnote">還沒有角色設定髮色，請到後台的「髮色」分頁設定。</p>'}<div class="hchart">${rows}</div>${unset&&L.length?`<p class="shnote">另有 ${unset} 位尚未設定髮色。</p>`:''}</section>`};
+const sheetView=()=>{
+ const all=S.chars,withH=all.filter(c=>hNum(c)!==null),avg=a=>a.length?(a.reduce((x,c)=>x+hNum(c),0)/a.length).toFixed(1):'—';
+ const F=all.filter(c=>c.sex==='F').length,M=all.filter(c=>c.sex==='M').length,U=all.length-F-M;
+ const ys=[...new Set(all.map(c=>c.year))].sort((a,b)=>b-a),ymax=Math.max(1,...ys.map(y=>all.filter(c=>c.year===y).length));
+ return `<section class="sh"><div class="shh"><h2>身高排行榜</h2><div class="shf">${seg('type',hf.type,[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']])}${seg('sex',hf.sex,[['all','全部'],['F','F'],['M','M']])}</div></div>
+ <p class="shnote">共 ${withH.length} 位有填身高。平均：F ${avg(withH.filter(c=>c.sex==='F'))} cm，M ${avg(withH.filter(c=>c.sex==='M'))} cm。</p>${heightRank()}</section>
+ ${hairChart()}
+ <div class="sh2">
+ <section class="sh"><div class="shh"><h2>男女比例</h2></div><div class="ratio">${F?`<span class="rf" style="flex:${F}">F ${F}</span>`:''}${M?`<span class="rm" style="flex:${M}">M ${M}</span>`:''}${U?`<span class="ru" style="flex:${U}">${U}</span>`:''}</div><p class="shnote">${U?`另有 ${U} 位未填性別。`:''}</p></section>
+ <section class="sh"><div class="shh"><h2>每年角色數</h2><span class="lg"><i class="k1"></i>ᴏᴄ <i class="k2"></i>ᴛʀᴘɢ</span></div><ul class="yrs">${ys.map(y=>{const o=all.filter(c=>c.year===y&&c.type==='oc').length,t=all.filter(c=>c.year===y&&c.type==='trpg').length;return `<li><span class="y">${y}</span><span class="st"><span class="k1" style="width:${o/ymax*100}%"></span><span class="k2" style="width:${t/ymax*100}%"></span></span><span class="n">${o+t}</span></li>`}).join('')}</ul></section>
+ </div>`};
+
+const LABEL={oc:'ᴏᴄ',trpg:'ᴛʀᴘɢ',co:'ᴄᴏ',project:'ᴘʀᴏᴊᴇᴄᴛ',sheet:'𝗦𝗛𝗘𝗘𝗧'};
 const curRoute=()=>LABEL[location.hash.slice(1)]?location.hash.slice(1):'oc';
 function render(){
  const r=curRoute();
  document.querySelectorAll('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+r?'page':'false'));
- view.innerHTML=ready?{oc:()=>roster(chars('oc')),trpg:()=>trOpen?roster(chars('trpg')):gate(),co:coView,project:pjView}[r]():'<p class="empty">讀取中…</p>';
+ view.innerHTML=ready?{oc:()=>roster(chars('oc')),trpg:()=>trOpen?roster(chars('trpg')):gate(),co:coView,project:pjView,sheet:sheetView}[r]():'<p class="empty">讀取中…</p>';
  syncCharm();
 }
 
@@ -249,15 +333,18 @@ const ovwHTML=r=>{
  if(r==='oc'||r==='trpg'){const L=chars(r);if(r==='trpg'&&!trOpen)return `<h3>${LABEL[r]}</h3><p class="npc">TRPG 角卡可能會劇透，先在頁面上打開再看總覽。</p>`;
   return `<h3>${LABEL[r]}　${L.length}</h3>`+[...new Set(L.map(c=>c.year))].map(y=>`<h4>${y}</h4><p>${L.filter(c=>c.year===y).map(nameLink).join('、')}</p>`).join('')}
  if(r==='co'){const L=coSorted();return `<h3>${LABEL[r]}　${L.length}</h3>`+[...new Set(L.map(x=>x.partner))].map(p=>`<h4>${esc(p)}</h4><p>${L.filter(x=>x.partner===p).map(x=>`${nm(x.a)} ✶ ${esc(x.b||'未填名')}`).join('<br>')}</p>`).join('')+(S.fam.length?`<h4>家族</h4><p>${S.fam.map(f=>famMembers(f).filter(m=>m[0]).map(m=>nm(m[0])).join('、')).join('<br>')}</p>`:'')}
+ if(r==='sheet'){const L=S.chars.filter(c=>hNum(c)!==null).sort((a,b)=>hNum(b)-hNum(a));return `<h3>${LABEL[r]}</h3><h4>身高排行榜</h4><p>${L.slice(0,20).map((c,i)=>`${i+1}. ${nameLink(c)} ${hNum(c)}`).join('<br>')}${L.length>20?'<br>…':''}</p>`}
  return `<h3>${LABEL[r]}</h3>`+pjSorted().map(i=>`<h4>${i.year} ${esc(i.month)}　${esc(i.name||'企劃名未填')}</h4><p>${castList(i).map(s=>nm(s.replace(/\s*\(NPC\)/,''))).join('、')}</p>`).join('');
 };
-const countOf=r=>r==='oc'?chars('oc').length:r==='trpg'?chars('trpg').length:r==='co'?S.co.length:S.pj.length;
+const countOf=r=>r==='oc'?chars('oc').length:r==='trpg'?chars('trpg').length:r==='co'?S.co.length:r==='sheet'?S.chars.filter(c=>hNum(c)!==null).length:S.pj.length;
 function syncCharm(){const r=curRoute();$('charmT').textContent=LABEL[r];$('charmN').textContent=countOf(r);if(ovw.classList.contains('on'))ovw.innerHTML=ovwHTML(r)}
 function setOvw(on){ovw.classList.toggle('on',on);charm.setAttribute('aria-expanded',on);if(on)ovw.innerHTML=ovwHTML(curRoute())}
 
 /* ---------- events ---------- */
 document.addEventListener('click',e=>{
  const t=e.target;
+ const ht=t.closest('[data-hairt]');if(ht){hairT=ht.dataset.hairt;render();return}
+ const hb=t.closest('[data-hf]');if(hb){const [k,v]=hb.dataset.hf.split(':');hf[k]=v;render();return}
  if(t.id==='openTr'){trOpen=true;try{sessionStorage.setItem('trOpen','1')}catch(err){}render();return}
  if(ov.classList.contains('on')&&(t===ov||t.closest('#dlg .close'))){closeDlg();return}
  if(t.closest('#charm')){charm.classList.remove('swing');void charm.offsetWidth;charm.classList.add('swing');setOvw(!ovw.classList.contains('on'));return}
