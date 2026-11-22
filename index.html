@@ -147,6 +147,16 @@ button.face:hover{filter:brightness(1.06)}
 .hc:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .hn{font-size:12px;color:#aaa;font-weight:700;padding-top:2px}
 @container (max-width:620px){.hcells{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.htab{display:flex;flex-direction:column;gap:18px}
+.htrow{display:flex;align-items:flex-start;gap:clamp(4px,1vw,12px)}
+.hgrp{flex:1;display:grid;grid-template-columns:auto repeat(5,minmax(0,1fr));gap:clamp(4px,1vw,12px);align-items:start}
+.hgrp:last-child{grid-template-columns:repeat(5,minmax(0,1fr)) auto}
+.hsx{flex:none;font-size:13px;font-weight:700;color:#fafafa;background:#bdbdbd;width:22px;height:22px;display:grid;place-items:center;margin-right:clamp(4px,1.4vw,14px)}
+.hend{font-size:12px;font-weight:700;color:#aaa;writing-mode:vertical-rl;letter-spacing:.2em;padding-top:4px}
+.hdots{color:#c8c8c8;align-self:center;font-size:16px;margin-top:-14px}
+.hcol{display:flex;flex-direction:column;align-items:stretch}
+.hk{text-align:center;font-size:11px;font-weight:700;color:#aaa;margin-top:4px;min-height:1.4em}
+@container (max-width:560px){.htrow{flex-wrap:wrap}.hsx{margin:0 0 2px}.hgrp{flex:0 0 100%}.hdots{display:none}}
 .npc{font-size:12px;color:var(--mute)}
 
 #ov{position:fixed;inset:0;background:rgb(250 250 250/.85);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
@@ -275,10 +285,11 @@ const gate=()=>`<div class="gate"><p style="font-size:18px">⚠️ TRPG 角卡�
 let hf={type:'all',sex:'all'};
 const hNum=c=>{const v=parseFloat(c.height);return isFinite(v)&&v>0?v:null};
 const seg=(key,cur,opts)=>`<div class="seg sm" role="group">${opts.map(([k,t])=>`<button data-hf="${key}:${k}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`;
-const heightRank=()=>{const L=S.chars.filter(c=>hNum(c)!==null&&(hf.type==='all'||c.type===hf.type)&&(hf.sex==='all'||c.sex===hf.sex)).sort((a,b)=>hNum(b)-hNum(a)||a.name.localeCompare(b.name));
- if(!L.length)return '<p class="empty">沒有符合條件、有填身高的角色。</p>';
- const max=hNum(L[0]),min=Math.min(...L.map(hNum)),lo=Math.max(0,Math.floor((min-10)/10)*10);let rank=0,prev=null;
- return `<ol class="hr">${L.map((c,i)=>{const h=hNum(c);if(h!==prev){rank=i+1;prev=h}return `<li><span class="rk">${rank}</span><button class="hrn" data-id="${c.id}"><span class="mini"${bg(c.avatar)}></span><span class="nm2"><b>${esc(c.name)}</b><i>${c.type==='trpg'?'✱':'✶'} ${c.sex||'-'}${c.age&&c.age!=='-'?' / '+esc(c.age)+(c.age==='?'?'':'y'):''}</i></span></button><span class="bar"><span style="width:${((h-lo)/(max-lo)*100).toFixed(1)}%"></span></span><span class="cm">${h}<small> cm</small></span></li>`}).join('')}</ol>`};
+const hCell=(c,rk)=>c?`<button class="hc${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}　${hNum(c)} cm"${bg(c.avatar)}>${c.avatar?`<span class="sr">${esc(c.name)} ${hNum(c)} cm</span>`:esc(c.name)}</button><span class="hk">${rk}</span>`:`<span class="hc empty"></span><span class="hk"></span>`;
+const heightRow=sex=>{const L=S.chars.filter(c=>c.sex===sex&&hNum(c)!==null).sort((a,b)=>hNum(b)-hNum(a)||a.name.localeCompare(b.name));
+ const tall=L.slice(0,5),short=L.slice(Math.max(5,L.length-5)).reverse();
+ const T=[0,1,2,3,4].map(i=>`<div class="hcol">${hCell(tall[i],i+1)}</div>`).join(''),Sh=[4,3,2,1,0].map(i=>`<div class="hcol">${hCell(short[i],i+1)}</div>`).join('');
+ return `<div class="htrow"><span class="hsx">${sex}</span><div class="hgrp"><span class="hend">高</span>${T}</div><span class="hdots">⋯</span><div class="hgrp">${Sh}<span class="hend">矮</span></div></div>`};
 
 const HAIR=[['red','紅・粉','#e3a3a3'],['orange','橘・棕','#e4cba1'],['yellow','黃・金','#e5e3a3'],['green','綠','#a8dcb0'],['blue','藍','#a3a5e3'],['purple','紫','#d0a3e3'],['black','黑・灰','#888888'],['white','白・銀','#fafafa']];
 let hairT='all';
@@ -291,8 +302,7 @@ const sheetView=()=>{
  const all=S.chars,withH=all.filter(c=>hNum(c)!==null),avg=a=>a.length?(a.reduce((x,c)=>x+hNum(c),0)/a.length).toFixed(1):'—';
  const F=all.filter(c=>c.sex==='F').length,M=all.filter(c=>c.sex==='M').length,U=all.length-F-M;
  const ys=[...new Set(all.map(c=>c.year))].sort((a,b)=>b-a),ymax=Math.max(1,...ys.map(y=>all.filter(c=>c.year===y).length));
- return `<section class="sh"><div class="shh"><h2>身高排行榜</h2><div class="shf">${seg('type',hf.type,[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']])}${seg('sex',hf.sex,[['all','全部'],['F','F'],['M','M']])}</div></div>
- <p class="shnote">共 ${withH.length} 位有填身高。平均：F ${avg(withH.filter(c=>c.sex==='F'))} cm，M ${avg(withH.filter(c=>c.sex==='M'))} cm。</p>${heightRank()}</section>
+ return `<section class="sh"><div class="shh"><h2>身高排行榜</h2></div><div class="htab">${heightRow('M')}${heightRow('F')}</div></section>
  ${hairChart()}
  <div class="sh2">
  <section class="sh"><div class="shh"><h2>男女比例</h2></div><div class="ratio">${F?`<span class="rf" style="flex:${F}">F ${F}</span>`:''}${M?`<span class="rm" style="flex:${M}">M ${M}</span>`:''}${U?`<span class="ru" style="flex:${U}">${U}</span>`:''}</div><p class="shnote">${U?`另有 ${U} 位未填性別。`:''}</p></section>
