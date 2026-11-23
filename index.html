@@ -13,7 +13,7 @@
    PICTURE: the portraits themselves; empty slots wait for an image.
    COLOUR and TYPE: white, light greys, black text only; Noto Sans TC throughout.
    LAYOUT: title, sheet tabs, grey year bar, four-up cards (two on phones). */
-:root{color-scheme:light;--bg:#fafafa;--card:#fafafa;--ink:#282828;--mute:#888;--line:#ececec;--bar:#d9d9d9;--slot:#f2f2f2}
+:root{color-scheme:light;--bg:#fafafa;--card:#fafafa;--ink:#282828;--mute:#888;--line:#ececec;--bar:#d9d9d9;--slot:#e4e4e4}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(24px,4vw,48px) max(5vw,16px)}
@@ -54,7 +54,7 @@ main.band{flex:1;background:var(--card);border:1px solid #d6d6d6;box-shadow:0 2p
 .ch:hover{box-shadow:0 2px 8px rgb(40 40 40/.14)}
 .ch:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .av{display:block;aspect-ratio:1;background:var(--slot) center/cover no-repeat;border-bottom:1px solid var(--line)}
-.av.none{display:grid;place-items:center;color:#c8c8c8;font-size:12px}
+.av.none{background:var(--slot)}
 .tag{position:absolute;top:0;right:-1px;width:14px;height:14px;background:#bdbdbd;color:#fafafa;font-size:9px;line-height:14px;text-align:center}
 .ch .nm{display:block;padding:5px 5px 4px;border-bottom:1px solid var(--line);min-height:44px}
 .ch i{display:block;font-style:normal;font-size:10px;color:#555;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -102,7 +102,7 @@ h3.sub{font-weight:700;font-size:18px;margin:40px 0 0;text-align:center}
 .pjc{margin:0;display:flex;flex-direction:column;align-items:center}
 .faces{display:flex}
 .face{all:unset;box-sizing:border-box;width:90px;height:90px;background:#ececec center/cover no-repeat;cursor:pointer;display:grid;place-items:center;align-content:center;font-size:11px;color:#999;text-align:center;line-height:1.3;padding:4px}
-.face.blank{border:1px solid #e2e2e2}.face+.face.blank{border-left:0}
+.face.blank{background:var(--slot)}
 span.face{cursor:default}.face small{display:block;font-size:9px;color:#bbb}
 .face:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
 button.face:hover{filter:brightness(1.06)}
@@ -111,9 +111,9 @@ button.face:hover{filter:brightness(1.06)}
 .pjc figcaption small{display:block;font-size:10px;font-weight:400;letter-spacing:.1em;color:#bbb}
 @media(max-width:600px){.pjy{grid-template-columns:minmax(0,1fr);gap:12px}.pjy h2{justify-self:start;padding:5px 12px}.pjg{gap:18px 22px}.face{width:64px;height:64px;font-size:10px}}
 .sh{margin:6px 0 34px}
-.shh{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:10px 18px;background:#d9d9d9;padding:5px 8px;margin-bottom:12px}
-.shh h2{margin:0;color:#fafafa;font-size:14px;font-weight:700;letter-spacing:.12em}
-.shf{display:flex;gap:8px;flex-wrap:wrap}
+.shh{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px 12px;min-height:32px;background:#d9d9d9;padding:5px 8px;margin-bottom:12px}
+.shh h2{grid-column:2;text-align:center;letter-spacing:.3em;margin:0;color:#fafafa;font-size:14px;font-weight:700;letter-spacing:.12em}
+.shf{grid-column:3;justify-self:end;display:flex;gap:8px;flex-wrap:wrap}
 .seg.sm{border:0;background:none;gap:2px}.seg.sm button{background:#fafafa;border:0;min-height:30px;padding:0 10px;font-size:12px}.seg.sm button+button{border:0}
 .seg.sm button[aria-pressed=true]{background:#555;color:#fafafa}
 .shnote{font-size:13px;color:var(--mute);margin:0 0 10px}
@@ -126,7 +126,7 @@ button.face:hover{filter:brightness(1.06)}
 .nm2{display:flex;flex-direction:column;min-width:0}.nm2 b{font-size:14px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm2 i{font-style:normal;font-size:11px;color:var(--mute)}
 .bar{height:8px;background:#efefef}.bar span{display:block;height:100%;background:#aaa55a}
 .cm{font-size:14px;font-weight:700;text-align:right;white-space:nowrap}.cm small{font-weight:400;color:var(--mute);font-size:11px}
-.sh2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:0 40px}
+.ratio.top{max-width:560px;margin:4px auto 34px;justify-content:center}
 .ratio{display:flex;height:34px;font-size:13px;font-weight:700;color:#fafafa}
 .ratio span{display:flex;align-items:center;padding:0 10px;white-space:nowrap;min-width:max-content}
 .rf{background:#aaa55a}.rm{background:#555}.ru{background:#cfcfcf;color:#555}
@@ -140,10 +140,10 @@ button.face:hover{filter:brightness(1.06)}
 @media(min-width:900px){main.band{padding-right:max(48px,calc(clamp(14px,4vw,56px) + 80px))}}
 .hchart{display:flex;flex-direction:column;gap:clamp(8px,1.4vw,14px)}
 .hrow{display:grid;grid-template-columns:clamp(18px,2.2vw,26px) minmax(0,1fr) 2em;gap:clamp(10px,2vw,22px);align-items:start}
-.hsw{display:block;aspect-ratio:1;border:1px solid #e6e6e6}
+.hsw{display:block;aspect-ratio:1}
 .hcells{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(4px,1vw,12px)}
 .hc{all:unset;box-sizing:border-box;aspect-ratio:1;background:#f3f3f3 center/cover no-repeat;display:grid;place-items:center;font-size:10px;color:#999;text-align:center;line-height:1.2;padding:2px;overflow:hidden;cursor:pointer}
-.hc.blank{border:1px solid #e2e2e2}.hc.empty{cursor:default;background:#f6f6f6}
+.hc.blank{background:var(--slot)}.hc.empty{cursor:default;background:#f6f6f6}
 .hc:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .hn{font-size:12px;color:#aaa;font-weight:700;padding-top:2px}
 @container (max-width:620px){.hcells{grid-template-columns:repeat(6,minmax(0,1fr))}}
@@ -157,13 +157,15 @@ button.face:hover{filter:brightness(1.06)}
 .hcol{display:flex;flex-direction:column;align-items:stretch}
 .hk{text-align:center;font-size:11px;font-weight:700;color:#aaa;margin-top:4px;min-height:1.4em}
 @container (max-width:560px){.htrow{flex-wrap:wrap}.hsx{margin:0 0 2px}.hgrp{flex:0 0 100%}.hdots{display:none}}
+.seg.sm button{white-space:nowrap}
+@container (max-width:520px){.shh{grid-template-columns:minmax(0,1fr);padding-bottom:8px}.shh h2,.shf{grid-column:1}.shf{justify-self:center}}
 .npc{font-size:12px;color:var(--mute)}
 
 #ov{position:fixed;inset:0;background:rgb(250 250 250/.85);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
 #ov.on{display:flex}
 #dlg{background:#fafafa;color:var(--ink);border:1px solid #e0e0e0;box-shadow:0 6px 30px rgb(40 40 40/.12);width:min(440px,100%);max-height:90vh;overflow:auto;padding:26px 24px 20px;position:relative;text-align:center}
 #dlg .close{position:absolute;right:4px;top:4px;width:44px;height:44px;border:0;background:none;font-size:20px;color:var(--mute)}
-#dlg .big{width:min(240px,70%);aspect-ratio:1;margin:8px auto 10px;background:var(--slot) center/cover no-repeat;display:grid;place-items:center;color:#bbb;font-size:13px;border:1px solid var(--line)}
+#dlg .big{width:min(240px,70%);aspect-ratio:1;margin:8px auto 10px;background:var(--slot) center/cover no-repeat;display:grid;place-items:center;color:#bbb;font-size:13px;border:0}
 #dlg .avbtns{display:flex;gap:8px;justify-content:center;margin-bottom:6px}
 #dlg .avbtns .btn{padding:6px 14px;font-size:14px}
 #dlg .kind{font-size:12px;color:var(--mute)}
@@ -263,7 +265,7 @@ const bg=u=>u?` style="background-image:url('${u}')"`:'';
 
 /* ---------- views ---------- */
 const view=$('view');
-const card=c=>`<button class="ch" data-id="${c.id}"><span class="av ${c.avatar?'':'none'}"${bg(c.avatar)}>${c.avatar?'':'頭貼'}</span><span class="tag" aria-hidden="true">${c.type==='trpg'?'✱':'✶'}</span><span class="nm">${c.reading?`<i>${esc(c.reading)}</i>`:''}<b>${esc(c.name)}</b></span><span class="row">${esc(stat(c))}</span><span class="row">${esc(c.job)}</span></button>`;
+const card=c=>`<button class="ch" data-id="${c.id}"><span class="av ${c.avatar?'':'none'}"${bg(c.avatar)}>${c.avatar?'':`<span class="sr">${esc(c.name)}</span>`}</span><span class="tag" aria-hidden="true">${c.type==='trpg'?'✱':'✶'}</span><span class="nm">${c.reading?`<i>${esc(c.reading)}</i>`:''}<b>${esc(c.name)}</b></span><span class="row">${esc(stat(c))}</span><span class="row">${esc(c.job)}</span></button>`;
 const roster=list=>{const ys=[...new Set(list.map(c=>c.year))];
  return ys.length?ys.map(y=>`<section class="yr"><h2>${y}</h2><div class="grid">${list.filter(c=>c.year===y).map(card).join('')}</div></section>`).join(''):`<p class="empty">還沒有角色。</p>`};
 const who=(n,r,role)=>{const c=n&&String(n).split('＆').length===1?findChar(n):null;
@@ -275,7 +277,7 @@ const coView=()=>{const list=coSorted(),ps=[...new Set(list.map(x=>x.partner))],
  (fam.length?`<h3 class="sub">家族</h3>`+fam.map(f=>`<section class="co"><h2>${esc(f.name)}</h2><div class="pairs">${famMembers(f).map(m=>`<div class="pair" style="grid-template-columns:minmax(0,1fr)">${who(m[0],m[1],m[2])}</div>`).join('')}</div></section>`).join(''):'');
 };
 const pjFace=s=>{const npc=/NPC/.test(s),n=s.replace(/\s*\(NPC\)/,''),c=npc?null:findChar(n);
- return c?`<button class="face${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}"${bg(c.avatar)}>${c.avatar?`<span class="sr">${esc(c.name)}</span>`:esc(c.name)}</button>`:`<span class="face blank" title="${esc(n)}${npc?'（NPC）':''}">${esc(n)}${npc?'<small>NPC</small>':''}</span>`};
+ return c?`<button class="face${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}"${bg(c.avatar)}><span class="sr">${esc(c.name)}</span></button>`:`<span class="face blank" title="${esc(n)}${npc?'（NPC）':''}"><span class="sr">${esc(n)}${npc?'（NPC）':''}</span></span>`};
 const pjView=()=>{if(!S.pj.length)return `<p class="empty">還沒有企劃資料。</p>`;const L=pjSorted(),ys=[...new Set(L.map(p=>p.year))];
  return `<div class="pjt">${ys.map(y=>`<section class="pjy"><h2>${y}</h2><div class="pjg">${L.filter(p=>p.year===y).map(p=>`<figure class="pjc"><div class="faces">${castList(p).map(pjFace).join('')}</div><figcaption>${p.month?`<small>${esc(p.month)}</small>`:''}${esc(p.name||'企劃名未填')}</figcaption></figure>`).join('')}</div></section>`).join('')}</div>`};
 const gate=()=>`<div class="gate"><p style="font-size:18px">⚠️ TRPG 角卡可能會劇透</p><p>角卡裡的身分與經歷可能洩漏模組內容。確定要看再打開。</p><button class="btn" id="openTr">顯示 TRPG 角卡</button></div>`;
@@ -285,29 +287,25 @@ const gate=()=>`<div class="gate"><p style="font-size:18px">⚠️ TRPG 角卡�
 let hf={type:'all',sex:'all'};
 const hNum=c=>{const v=parseFloat(c.height);return isFinite(v)&&v>0?v:null};
 const seg=(key,cur,opts)=>`<div class="seg sm" role="group">${opts.map(([k,t])=>`<button data-hf="${key}:${k}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`;
-const hCell=(c,rk)=>c?`<button class="hc${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}　${hNum(c)} cm"${bg(c.avatar)}>${c.avatar?`<span class="sr">${esc(c.name)} ${hNum(c)} cm</span>`:esc(c.name)}</button><span class="hk">${rk}</span>`:`<span class="hc empty"></span><span class="hk"></span>`;
+const hCell=(c,rk)=>c?`<button class="hc${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}　${hNum(c)} cm"${bg(c.avatar)}><span class="sr">${esc(c.name)} ${hNum(c)} cm</span></button><span class="hk">${rk}</span>`:`<span class="hc empty"></span><span class="hk"></span>`;
 const heightRow=sex=>{const L=S.chars.filter(c=>c.sex===sex&&hNum(c)!==null).sort((a,b)=>hNum(b)-hNum(a)||a.name.localeCompare(b.name));
  const tall=L.slice(0,5),short=L.slice(Math.max(5,L.length-5)).reverse();
  const T=[0,1,2,3,4].map(i=>`<div class="hcol">${hCell(tall[i],i+1)}</div>`).join(''),Sh=[4,3,2,1,0].map(i=>`<div class="hcol">${hCell(short[i],i+1)}</div>`).join('');
  return `<div class="htrow"><span class="hsx">${sex}</span><div class="hgrp"><span class="hend">高</span>${T}</div><span class="hdots">⋯</span><div class="hgrp">${Sh}<span class="hend">矮</span></div></div>`};
 
-const HAIR=[['red','紅・粉','#e3a3a3'],['orange','橘・棕','#e4cba1'],['yellow','黃・金','#e5e3a3'],['green','綠','#a8dcb0'],['blue','藍','#a3a5e3'],['purple','紫','#d0a3e3'],['black','黑・灰','#888888'],['white','白・銀','#fafafa']];
+const HAIR=[['red','紅・粉','#c9a3a1'],['orange','橘・棕','#c9ad91'],['yellow','黃・金','#d4caa3'],['green','綠','#a7b5a0'],['blue','藍','#9fabba'],['purple','紫','#b1a3b6'],['black','黑・灰','#7c7a78'],['white','白・銀','#ebe8e3']];
 let hairT='all';
 const hairChart=()=>{const L=S.chars.filter(c=>c.hair&&(hairT==='all'||c.type===hairT)).sort((a,b)=>b.year-a.year||a.order-b.order);
  const unset=S.chars.filter(c=>!c.hair&&(hairT==='all'||c.type===hairT)).length;
  const rows=HAIR.map(h=>{const M=L.filter(c=>c.hair===h[0]),fill=Math.max(12,Math.ceil(M.length/12)*12)-M.length;
-  return `<div class="hrow"><span class="hsw" style="background:${h[2]}" title="${h[1]}"><span class="sr">${h[1]}</span></span><div class="hcells">${M.map(c=>`<button class="hc${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}"${bg(c.avatar)}>${c.avatar?`<span class="sr">${esc(c.name)}</span>`:esc(c.name)}</button>`).join('')}${'<span class="hc empty"></span>'.repeat(fill)}</div><span class="hn">${M.length}</span></div>`}).join('');
- return `<section class="sh"><div class="shh"><h2>髮色排行榜</h2><div class="shf"><div class="seg sm" role="group">${[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']].map(([k,t])=>`<button data-hairt="${k}" aria-pressed="${hairT===k}">${t}</button>`).join('')}</div></div></div>${L.length?'':'<p class="shnote">還沒有角色設定髮色，請到後台的「髮色」分頁設定。</p>'}<div class="hchart">${rows}</div>${unset&&L.length?`<p class="shnote">另有 ${unset} 位尚未設定髮色。</p>`:''}</section>`};
+  return `<div class="hrow"><span class="hsw" style="background:${h[2]}" title="${h[1]}"><span class="sr">${h[1]}</span></span><div class="hcells">${M.map(c=>`<button class="hc${c.avatar?'':' blank'}" data-id="${c.id}" title="${esc(c.name)}"${bg(c.avatar)}><span class="sr">${esc(c.name)}</span></button>`).join('')}${'<span class="hc empty"></span>'.repeat(fill)}</div><span class="hn">${M.length}</span></div>`}).join('');
+ return `<section class="sh"><div class="shh"><h2>髮色</h2><div class="shf"><div class="seg sm" role="group">${[['all','全部'],['oc','ᴏᴄ'],['trpg','ᴛʀᴘɢ']].map(([k,t])=>`<button data-hairt="${k}" aria-pressed="${hairT===k}">${t}</button>`).join('')}</div></div></div>${L.length?'':'<p class="shnote">還沒有角色設定髮色，請到後台的「髮色」分頁設定。</p>'}<div class="hchart">${rows}</div>${unset&&L.length?`<p class="shnote">另有 ${unset} 位尚未設定髮色。</p>`:''}</section>`};
 const sheetView=()=>{
  const all=S.chars,withH=all.filter(c=>hNum(c)!==null),avg=a=>a.length?(a.reduce((x,c)=>x+hNum(c),0)/a.length).toFixed(1):'—';
  const F=all.filter(c=>c.sex==='F').length,M=all.filter(c=>c.sex==='M').length,U=all.length-F-M;
- const ys=[...new Set(all.map(c=>c.year))].sort((a,b)=>b-a),ymax=Math.max(1,...ys.map(y=>all.filter(c=>c.year===y).length));
- return `<section class="sh"><div class="shh"><h2>身高排行榜</h2></div><div class="htab">${heightRow('M')}${heightRow('F')}</div></section>
- ${hairChart()}
- <div class="sh2">
- <section class="sh"><div class="shh"><h2>男女比例</h2></div><div class="ratio">${F?`<span class="rf" style="flex:${F}">F ${F}</span>`:''}${M?`<span class="rm" style="flex:${M}">M ${M}</span>`:''}${U?`<span class="ru" style="flex:${U}">${U}</span>`:''}</div><p class="shnote">${U?`另有 ${U} 位未填性別。`:''}</p></section>
- <section class="sh"><div class="shh"><h2>每年角色數</h2><span class="lg"><i class="k1"></i>ᴏᴄ <i class="k2"></i>ᴛʀᴘɢ</span></div><ul class="yrs">${ys.map(y=>{const o=all.filter(c=>c.year===y&&c.type==='oc').length,t=all.filter(c=>c.year===y&&c.type==='trpg').length;return `<li><span class="y">${y}</span><span class="st"><span class="k1" style="width:${o/ymax*100}%"></span><span class="k2" style="width:${t/ymax*100}%"></span></span><span class="n">${o+t}</span></li>`}).join('')}</ul></section>
- </div>`};
+ return `<div class="ratio top" role="img" aria-label="女 ${F} 位，男 ${M} 位${U?`，未填 ${U} 位`:''}">${F?`<span class="rf" style="flex:${F}">F ${F}</span>`:''}${M?`<span class="rm" style="flex:${M}">M ${M}</span>`:''}${U?`<span class="ru" style="flex:${U}">? ${U}</span>`:''}</div>
+ <section class="sh"><div class="shh"><h2>身高</h2></div><div class="htab">${heightRow('M')}${heightRow('F')}</div></section>
+ ${hairChart()}`};
 
 const LABEL={oc:'ᴏᴄ',trpg:'ᴛʀᴘɢ',co:'ᴄᴏ',project:'ᴘʀᴏᴊᴇᴄᴛ',sheet:'𝗦𝗛𝗘𝗘𝗧'};
 const curRoute=()=>LABEL[location.hash.slice(1)]?location.hash.slice(1):'oc';
@@ -325,7 +323,7 @@ function openChar(id){
  const co=coOf(c),pj=pjOf(c),fam=famOf(c);
  dlg.innerHTML=`<button class="close" aria-label="關閉">✕</button>
  <div class="kind">${c.type==='oc'?'✶ ᴏᴄ':'✱ ᴛʀᴘɢ'}　${c.year}</div>
- <div class="big"${bg(c.avatar)}>${c.avatar?'':'尚未放頭貼'}</div>
+ <div class="big"${bg(c.avatar)}></div>
  ${c.reading?`<p class="rd">${esc(c.reading)}</p>`:''}<h2 id="dn">${esc(c.name)}</h2>
  <p class="stat">${esc(stat(c))}</p>${c.job?`<p class="stat">${esc(c.job)}</p>`:''}
  ${co.length?`<h5>CO 配對</h5><ul>${co.map(x=>`<li>${x.arl?esc(x.arl)+'，':''}與 <b>${esc(x.b||'未填名')}</b>${x.brl?`（${esc(x.brl)}）`:''}${x.tag?`　<span class="npc">${esc(x.tag)}</span>`:''}<br><span class="npc">合作：${esc(x.partner)}</span></li>`).join('')}</ul>`:''}
@@ -343,7 +341,7 @@ const ovwHTML=r=>{
  if(r==='oc'||r==='trpg'){const L=chars(r);if(r==='trpg'&&!trOpen)return `<h3>${LABEL[r]}</h3><p class="npc">TRPG 角卡可能會劇透，先在頁面上打開再看總覽。</p>`;
   return `<h3>${LABEL[r]}　${L.length}</h3>`+[...new Set(L.map(c=>c.year))].map(y=>`<h4>${y}</h4><p>${L.filter(c=>c.year===y).map(nameLink).join('、')}</p>`).join('')}
  if(r==='co'){const L=coSorted();return `<h3>${LABEL[r]}　${L.length}</h3>`+[...new Set(L.map(x=>x.partner))].map(p=>`<h4>${esc(p)}</h4><p>${L.filter(x=>x.partner===p).map(x=>`${nm(x.a)} ✶ ${esc(x.b||'未填名')}`).join('<br>')}</p>`).join('')+(S.fam.length?`<h4>家族</h4><p>${S.fam.map(f=>famMembers(f).filter(m=>m[0]).map(m=>nm(m[0])).join('、')).join('<br>')}</p>`:'')}
- if(r==='sheet'){const L=S.chars.filter(c=>hNum(c)!==null).sort((a,b)=>hNum(b)-hNum(a));return `<h3>${LABEL[r]}</h3><h4>身高排行榜</h4><p>${L.slice(0,20).map((c,i)=>`${i+1}. ${nameLink(c)} ${hNum(c)}`).join('<br>')}${L.length>20?'<br>…':''}</p>`}
+ if(r==='sheet'){const L=S.chars.filter(c=>hNum(c)!==null).sort((a,b)=>hNum(b)-hNum(a));return `<h3>${LABEL[r]}</h3><h4>身高</h4><p>${L.slice(0,20).map((c,i)=>`${i+1}. ${nameLink(c)} ${hNum(c)}`).join('<br>')}${L.length>20?'<br>…':''}</p>`}
  return `<h3>${LABEL[r]}</h3>`+pjSorted().map(i=>`<h4>${i.year} ${esc(i.month)}　${esc(i.name||'企劃名未填')}</h4><p>${castList(i).map(s=>nm(s.replace(/\s*\(NPC\)/,''))).join('、')}</p>`).join('');
 };
 const countOf=r=>r==='oc'?chars('oc').length:r==='trpg'?chars('trpg').length:r==='co'?S.co.length:r==='sheet'?S.chars.filter(c=>hNum(c)!==null).length:S.pj.length;

@@ -279,7 +279,7 @@ const bg=u=>u?` style="background-image:url('${u}')"`:'';
 const stat=c=>`${c.sex||'-'} / ${!c.age?'-':c.age==='-'||c.age==='?'?c.age:c.age+'y'} / ${!c.height||c.height==='-'?'-':c.height} cm`;
 
 /* ---------- schema ---------- */
-const HAIR=[['red','紅・粉','#e3a3a3'],['orange','橘・棕','#e4cba1'],['yellow','黃・金','#e5e3a3'],['green','綠','#a8dcb0'],['blue','藍','#a3a5e3'],['purple','紫','#d0a3e3'],['black','黑・灰','#888888'],['white','白・銀','#fafafa']];
+const HAIR=[['red','紅・粉','#c9a3a1'],['orange','橘・棕','#c9ad91'],['yellow','黃・金','#d4caa3'],['green','綠','#a7b5a0'],['blue','藍','#9fabba'],['purple','紫','#b1a3b6'],['black','黑・灰','#7c7a78'],['white','白・銀','#ebe8e3']];
 
 const SCHEMA={
  chars:[{k:'type',l:'類別',t:'select',o:[['oc','ᴏᴄ 原創角色'],['trpg','ᴛʀᴘɢ 角卡']]},{k:'year',l:'年份',t:'number',req:1},{k:'name',l:'名字',req:1},{k:'reading',l:'讀音／原文名',ph:'きんざき あきよ、Daru Rajput'},{k:'sex',l:'性別',t:'select',o:[['F','F'],['M','M'],['','未填']]},{k:'age',l:'年齡',ph:'數字，或 ? / -'},{k:'height',l:'身高 cm',ph:'數字，或 -'},{k:'job',l:'身分'},{k:'hair',l:'髮色',t:'select',o:[['','未設定'],...HAIR.map(h=>[h[0],h[1]])]},{k:'avatar',l:'頭貼',t:'image'}],
